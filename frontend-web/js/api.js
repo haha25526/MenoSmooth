@@ -1,5 +1,5 @@
 // API client with JWT token
-const API_BASE = '/api/v1';
+const API_BASE = '/meno/api/v1';
 
 const api = {
   async request(method, path, data = null) {
