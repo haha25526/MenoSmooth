@@ -149,12 +149,12 @@
         <h3 style="text-align: center; color: #8B4585; margin-bottom: 20px;">完善个人资料</h3>
 
         <div class="avatar-section">
-          <div class="avatar-big" @click="showAvatarPicker = true">
-            {{ avatarDisplay }}
+          <div class="avatar-big" @click="showAvatarPicker = true" style="overflow: hidden; padding: 0;">
+            <img :src="avatarDisplay" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" />
           </div>
           <div class="avatar-options">
-            <div v-for="av in avatarOptions" :key="av" class="avatar-opt" :class="{ selected: profileForm.avatar === av }" @click="profileForm.avatar = av">
-              {{ av }}
+            <div v-for="av in avatarOptions" :key="av.value" class="avatar-opt" :class="{ selected: profileForm.avatar === av.value }" @click="profileForm.avatar = av.value" :title="av.label">
+              <img :src="av.value" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" />
             </div>
           </div>
           <input type="file" accept="image/*" ref="avatarFileInput" @change="handleAvatarUpload" style="display: none;">
@@ -177,10 +177,12 @@
           <el-button type="primary" @click="saveProfile" block size="large" style="margin-top: 16px;">保存并开始</el-button>
         </el-form>
 
-        <el-dialog v-model="showAvatarPicker" title="选择头像" width="200px" :modal="false">
-          <div style="text-align: center;">
-            <div v-for="av in avatarOptions" :key="av" style="font-size: 40px; padding: 8px; cursor: pointer;" @click="profileForm.avatar = av; showAvatarPicker = false">
-              {{ av }}
+        <el-dialog v-model="showAvatarPicker" title="选择头像" width="260px" :modal="false">
+          <div style="display: flex; gap: 12px; justify-content: center; padding: 8px 0;">
+            <div v-for="av in avatarOptions" :key="av.value" @click="profileForm.avatar = av.value; showAvatarPicker = false"
+                 style="width: 64px; height: 64px; border-radius: 50%; cursor: pointer; overflow: hidden; border: 3px solid transparent; transition: border-color 0.2s;"
+                 :style="{ borderColor: profileForm.avatar === av.value ? 'var(--primary)' : 'transparent' }">
+              <img :src="av.value" style="width: 100%; height: 100%; object-fit: cover;" :title="av.label" />
             </div>
           </div>
         </el-dialog>
@@ -235,7 +237,10 @@
                 <p>有什么关于更年期的问题，都可以问我</p>
               </div>
               <div v-for="msg in messages" :key="msg.id" class="msg-row" :class="msg.role">
-                <div class="msg-avatar">{{ msg.role === 'user' ? '👩' : '🌸' }}</div>
+                <div class="msg-avatar" v-if="msg.role === 'user'" style="overflow: hidden; padding: 0;">
+                  <img :src="avatarDisplay" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" />
+                </div>
+                <div class="msg-avatar" v-else>🌸</div>
                 <div class="msg-bubble">{{ msg.content }}</div>
               </div>
               <div v-if="chatLoading" class="msg-row assistant">
@@ -349,7 +354,9 @@
         <!-- PROFILE -->
         <template v-if="currentPage === 'profile'">
           <div class="avatar-section">
-            <div class="avatar-big">{{ avatarDisplay }}</div>
+            <div class="avatar-big" style="overflow: hidden; padding: 0;">
+              <img :src="avatarDisplay" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" />
+            </div>
             <div style="margin-top: 8px; font-size: 16px; font-weight: 600;">{{ user?.nickname }}</div>
           </div>
           <div style="background: white; border-radius: 12px; padding: 16px;">
@@ -550,8 +557,12 @@
         // Profile
         const profileForm = reactive({ nickname: '', avatar: '', birthday: '', height: 160 });
         const showAvatarPicker = ref(false);
-        const avatarOptions = ['👩', '👩‍🦰', '👩‍🦳'];
-        const avatarDisplay = computed(() => profileForm.avatar || user.value?.avatar || '👩');
+        const avatarOptions = [
+          { label: '书房', value: '/static/avatars/1.jpg' },
+          { label: '画室', value: '/static/avatars/2.jpg' },
+          { label: '花店', value: '/static/avatars/3.jpg' },
+        ];
+        const avatarDisplay = computed(() => profileForm.avatar || user.value?.avatar || avatarOptions[0].value);
 
         // Lab tests
         const labTests = ref([]);
