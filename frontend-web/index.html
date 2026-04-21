@@ -185,7 +185,10 @@
     .el-button--primary:hover { background: var(--primary-dark) !important; border-color: var(--primary-dark) !important; }
 
     /* Bottom tab bar */
-    .tab-bar { display: flex; border-top: 1px solid var(--border); background: white; position: absolute; bottom: 0; left: 0; right: 0; z-index: 100; padding-bottom: env(safe-area-inset-bottom, 0); }
+    .tab-bar { display: flex; border-top: 1px solid var(--border); background: white; position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 390px; z-index: 1000; padding-bottom: env(safe-area-inset-bottom, 0); }
+    @media (max-width: 480px) {
+      .tab-bar { left: 0; transform: none; width: 100%; }
+    }
     .tab-item { flex: 1; text-align: center; padding: 8px 0 10px; font-size: 11px; color: var(--text-light); cursor: pointer; }
     .tab-item.active { color: var(--primary); }
     .tab-icon { font-size: 22px; display: block; line-height: 1.3; }
@@ -266,8 +269,9 @@
     <!-- MAIN APP -->
     <template v-else>
       <!-- Header -->
-      <div class="main-header" :style="{ position: recordSubPage ? 'relative' : 'static' }">
-        <button v-if="recordSubPage" class="back-btn" @click="recordSubPage = null">←</button>
+      <div class="main-header" :style="{ position: (recordSubPage || scaleActiveTest) ? 'relative' : 'static' }">
+        <button v-if="recordSubPage && !scaleActiveTest" class="back-btn" @click="recordSubPage = null">←</button>
+        <button v-if="scaleActiveTest" class="back-btn" @click="scaleActiveTest = null; kuppermanTaking = false; hormoneTaking = false;">←</button>
         <h2>{{ pageTitle }}</h2>
       </div>
 
@@ -378,18 +382,18 @@
           </template>
 
           <!-- Record sub-page: SCALE TESTS -->
-          <template v-if="recordSubPage === 'scale-tests'">
+          <!-- Type selection page -->
+          <template v-if="recordSubPage === 'scale-tests' && !scaleActiveTest">
             <div class="sub-body">
-              <!-- 类型选择（未进行时显示） -->
-              <div v-if="!kuppermanTaking && !hormoneTaking" class="scale-types-row">
-                <button class="scale-type-card" @click="scaleTestType = 'kupperman'; startKupperman()">
+              <div class="scale-types-row">
+                <button class="scale-type-card" @click="startKupperman()">
                   <div class="rec-ico purple">📋</div>
                   <div style="flex:1;">
                     <div style="font-size:14px;font-weight:600;color:var(--text-dark);">Kupperman</div>
                     <div style="font-size:11px;color:var(--text-mid);">更年期症状评分 · 10题</div>
                   </div>
                 </button>
-                <button class="scale-type-card" @click="scaleTestType = 'hormone'; startHormone()">
+                <button class="scale-type-card" @click="startHormone()">
                   <div class="rec-ico pink">💊</div>
                   <div style="flex:1;">
                     <div style="font-size:14px;font-weight:600;color:var(--text-dark);">荷尔蒙评估</div>
@@ -397,13 +401,35 @@
                   </div>
                 </button>
               </div>
-
-              <!-- Kupperman test (inline) -->
-              <template v-if="kuppermanTaking">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                  <div style="font-size: 15px; font-weight: 600; color: var(--text-dark);">Kupperman 评估</div>
-                  <button @click="kuppermanTaking = false" style="background: none; border: 1px solid var(--border); border-radius: 8px; padding: 4px 12px; font-size: 12px; color: var(--text-mid); cursor: pointer;">返回</button>
+              <!-- Scale test history (only on type selection page) -->
+              <div v-if="scaleTests.length > 0" style="margin-top: 16px;">
+                <div class="hist-title">历史评估（长按删除）</div>
+                <div class="record-list">
+                  <div v-for="t in scaleTests" :key="t.id"
+                       class="record-card"
+                       @touchstart="touchDelete(t.id)" @touchend="releaseDelete" @mousedown="touchDelete(t.id)" @mouseup="releaseDelete">
+                    <div class="rc-header">
+                      <span class="rc-date">{{ t.test_date }}</span>
+                      <span style="font-size: 12px; color: var(--primary);">{{ t.scale_type === 'kupperman' ? 'Kupperman' : '荷尔蒙' }}</span>
+                    </div>
+                    <div class="rc-data">
+                      <div class="rc-item"><div class="rc-label">总分</div><div class="rc-value">{{ t.total_score }}</div></div>
+                      <div v-if="t.severity_level" class="rc-item"><div class="rc-label">程度</div><div class="rc-value">{{ t.severity_level }}</div></div>
+                    </div>
+                  </div>
                 </div>
+              </div>
+            </div>
+          </template>
+
+          <!-- Kupperman test (full page) -->
+          <template v-if="scaleActiveTest === 'kupperman'">
+            <div class="sub-body">
+              <div v-if="kuppermanQuestions.length === 0" class="empty-state">
+                <div class="empty-icon">📋</div>
+                <p>题目加载中...</p>
+              </div>
+              <template v-else>
                 <div v-for="q in kuppermanQuestions" :key="q.id" class="scale-question">
                   <div class="sq-label">{{ q.label }}</div>
                   <div class="sq-options">
@@ -414,26 +440,20 @@
                 </div>
                 <el-button type="primary" @click="submitKupperman" block size="large">提交评估</el-button>
               </template>
+            </div>
+          </template>
 
-              <!-- Hormone test (inline) -->
-              <template v-if="hormoneTaking">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                  <div style="font-size: 15px; font-weight: 600; color: var(--text-dark);">荷尔蒙评估</div>
-                  <button @click="hormoneTaking = false" style="background: none; border: 1px solid var(--border); border-radius: 8px; padding: 4px 12px; font-size: 12px; color: var(--text-mid); cursor: pointer;">返回</button>
-                </div>
-                <div style="display: flex; gap: 6px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 4px;">
-                  <div v-for="(dim, idx) in hormoneQuestions.dimensions" :key="idx"
-                       class="hormone-dim-tab"
-                       :class="{ active: hormoneCurrentDim === idx }"
-                       @click="hormoneCurrentDim = idx">
-                    {{ dim.name.split('(')[0] }}
-                  </div>
-                </div>
-                <div v-if="hormoneQuestions.dimensions[hormoneCurrentDim]" :key="hormoneCurrentDim">
-                  <div style="font-size: 12px; color: var(--text-mid); margin-bottom: 8px;">
-                    {{ hormoneQuestions.dimensions[hormoneCurrentDim].name }}
-                  </div>
-                  <div v-for="q in hormoneQuestions.dimensions[hormoneCurrentDim].questions" :key="q.id" class="scale-question">
+          <!-- Hormone test (full page, flat scroll) -->
+          <template v-if="scaleActiveTest === 'hormone'">
+            <div class="sub-body">
+              <div v-if="hormoneQuestions.dimensions && hormoneQuestions.dimensions.length === 0" class="empty-state">
+                <div class="empty-icon">💊</div>
+                <p>题目加载中...</p>
+              </div>
+              <template v-else>
+                <div v-for="dim in hormoneQuestions.dimensions" :key="dim.name" style="margin-bottom: 16px;">
+                  <div style="font-size: 14px; font-weight: 600; color: var(--primary-dark); margin-bottom: 10px; padding-left: 4px; border-left: 3px solid var(--primary);">{{ dim.name }}</div>
+                  <div v-for="q in dim.questions" :key="q.id" class="scale-question">
                     <div class="sq-label">{{ q.label }}</div>
                     <div class="sq-options">
                       <div v-for="opt in q.options" :key="opt.score" class="sq-opt" :class="{ selected: hormoneAnswers[q.id] === opt.score }" @click="hormoneAnswers[q.id] = opt.score">
@@ -442,31 +462,8 @@
                     </div>
                   </div>
                 </div>
-                <div style="display: flex; gap: 10px; margin-top: 12px;">
-                  <el-button @click="hormonePrevDim" :disabled="hormoneCurrentDim === 0" style="flex: 1;">上一组</el-button>
-                  <el-button v-if="hormoneCurrentDim < hormoneQuestions.dimensions.length - 1"
-                             type="primary" @click="hormoneNextDim" style="flex: 1;">下一组</el-button>
-                  <el-button v-else type="primary" @click="submitHormone" style="flex: 1;">提交评估</el-button>
-                </div>
+                <el-button type="primary" @click="submitHormone" block size="large">提交评估</el-button>
               </template>
-
-              <!-- Scale test history -->
-              <div v-if="scaleTests.length > 0" style="margin-top: 16px;">
-                <div class="hist-title">历史评估</div>
-                <div class="record-list">
-                  <div v-for="t in scaleTests" :key="t.id" class="record-card">
-                    <div class="rc-header">
-                      <span class="rc-date">{{ t.test_date }}</span>
-                      <span style="font-size: 12px; color: var(--primary);">{{ t.scale_type === 'kupperman' ? 'Kupperman' : '荷尔蒙' }}</span>
-                    </div>
-                    <div class="rc-data">
-                      <div class="rc-item"><div class="rc-label">总分</div><div class="rc-value">{{ t.total_score }}</div></div>
-                      <div v-if="t.severity_level" class="rc-item"><div class="rc-label">程度</div><div class="rc-value">{{ t.severity_level }}</div></div>
-                    </div>
-                    <span class="rc-delete" @click="deleteScaleTest(t.id)">✕</span>
-                  </div>
-                </div>
-              </div>
             </div>
           </template>
         </template>
@@ -610,42 +607,6 @@
     </el-dialog>
 
     <!-- Hormone assessment -->
-    <el-dialog v-model="showHormoneForm" title="荷尔蒙健康定量评估" width="90%" :close-on-click-modal="false">
-      <template v-if="!hormoneTaking">
-        <p style="color: #999; font-size: 13px; margin-bottom: 12px;">根据过去3个月的体验，选择最符合的选项</p>
-        <el-button type="primary" @click="startHormone" block size="large">开始评估</el-button>
-      </template>
-      <template v-else>
-        <div style="display: flex; gap: 6px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 4px;">
-          <div v-for="(dim, idx) in hormoneQuestions.dimensions" :key="idx"
-               class="hormone-dim-tab"
-               :class="{ active: hormoneCurrentDim === idx }"
-               @click="hormoneCurrentDim = idx">
-            {{ dim.name.split('（')[0] }}
-          </div>
-        </div>
-        <div v-if="hormoneQuestions.dimensions[hormoneCurrentDim]" :key="hormoneCurrentDim">
-          <div style="font-size: 12px; color: var(--text-mid); margin-bottom: 8px;">
-            {{ hormoneQuestions.dimensions[hormoneCurrentDim].name }}
-          </div>
-          <div v-for="q in hormoneQuestions.dimensions[hormoneCurrentDim].questions" :key="q.id" class="scale-question">
-            <div class="sq-label">{{ q.label }}</div>
-            <div class="sq-options">
-              <div v-for="opt in q.options" :key="opt.score" class="sq-opt" :class="{ selected: hormoneAnswers[q.id] === opt.score }" @click="hormoneAnswers[q.id] = opt.score">
-                {{ opt.label }}
-              </div>
-            </div>
-          </div>
-        </div>
-        <div style="display: flex; gap: 10px; margin-top: 12px;">
-          <el-button @click="hormonePrevDim" :disabled="hormoneCurrentDim === 0" style="flex: 1;">上一组</el-button>
-          <el-button v-if="hormoneCurrentDim < hormoneQuestions.dimensions.length - 1"
-                     type="primary" @click="hormoneNextDim" style="flex: 1;">下一组</el-button>
-          <el-button v-else type="primary" @click="submitHormone" style="flex: 1;">提交评估</el-button>
-        </div>
-      </template>
-    </el-dialog>
-
     <el-dialog v-model="showHormoneResult" title="评估结果" width="90%">
       <div class="scale-result">
         <div class="sr-score">{{ hormoneResult.total_score }}</div>
@@ -691,7 +652,9 @@
         const currentTab = ref('chat'); // Default landing tab after login
         const recordSubPage = ref(null); // lab-tests, daily-metrics, scale-tests
         const scaleTestType = ref('kupperman');
+        const scaleActiveTest = ref(null); // null | 'kupperman' | 'hormone'
         const showAboutInfo = ref(false);
+        const deleteTimeout = ref(null);
 
         const user = ref(null);
         const messages = ref([]);
@@ -701,6 +664,8 @@
         const sessionId = ref('');
 
         const pageTitle = computed(() => {
+          if (scaleActiveTest.value === 'kupperman') return 'Kupperman 评估';
+          if (scaleActiveTest.value === 'hormone') return '荷尔蒙评估';
           if (recordSubPage.value) {
             return { 'lab-tests': '体检化验', 'daily-metrics': '日常数据', 'scale-tests': '量表测试' }[recordSubPage.value] || '';
           }
@@ -823,6 +788,7 @@
         function switchTab(tab) {
           currentTab.value = tab;
           recordSubPage.value = null;
+          scaleActiveTest.value = null;
           kuppermanTaking.value = false;
           hormoneTaking.value = false;
           if (tab === 'chat') loadChatHistory();
@@ -927,6 +893,7 @@
           try {
             kuppermanQuestions.value = await api.get('/scale-tests/kupperman/questions');
             kuppermanTaking.value = true;
+            scaleActiveTest.value = 'kupperman';
             Object.keys(kuppermanAnswers).forEach(k => delete kuppermanAnswers[k]);
           } catch (e) { ElementPlus.ElMessage.error(e.message); }
         }
@@ -1008,6 +975,19 @@
         async function deleteScaleTest(id) {
           try { await api.del(`/scale-tests/${id}`); await loadScaleTests(); ElementPlus.ElMessage.success('已删除'); }
           catch (e) { ElementPlus.ElMessage.error(e.message); }
+        }
+
+        // Long-press delete for history items
+        function touchDelete(id) {
+          deleteTimeout.value = setTimeout(() => {
+            deleteScaleTest(id);
+          }, 600);
+        }
+        function releaseDelete() {
+          if (deleteTimeout.value) {
+            clearTimeout(deleteTimeout.value);
+            deleteTimeout.value = null;
+          }
         }
 
         function handleLogout() {
@@ -1095,10 +1075,10 @@
           profileForm, showAvatarPicker, avatarOptions, avatarDisplay, saveProfile, handleAvatarUpload,
           labTests, showLabForm, showLabUpload, showLabConfirm, labForm, submitLabForm, deleteLabTest,
           dailyMetrics, showDailyForm, showDailyUpload, showDailyConfirm, dailyForm, submitDailyForm, deleteDailyMetric,
-          scaleTests, kuppermanTaking, kuppermanQuestions, kuppermanAnswers, startKupperman, submitKupperman,
+          scaleTests, kuppermanTaking, scaleActiveTest, kuppermanQuestions, kuppermanAnswers, startKupperman, submitKupperman,
           showHormoneForm, hormoneTaking, hormoneCurrentDim, hormoneQuestions, hormoneAnswers,
           startHormone, hormoneNextDim, hormonePrevDim, submitHormone,
-          showHormoneResult, hormoneResult, deleteScaleTest,
+          showHormoneResult, hormoneResult, deleteScaleTest, touchDelete, releaseDelete,
           switchTab, loadChatHistory, sendMessage, handleLogout, goToProfileSetup,
         };
       }
