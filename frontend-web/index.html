@@ -21,8 +21,29 @@
       --border: #E8E4DE;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background: var(--bg); min-height: 100vh; color: var(--text-dark); }
-    #app { max-width: 480px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background: #1a1a1a; min-height: 100vh; color: var(--text-dark); display: flex; justify-content: center; align-items: flex-start; padding: 24px 16px; }
+
+    /* Phone container */
+    .phone-container {
+      width: 390px;
+      height: 844px;
+      background: var(--bg);
+      border-radius: 40px;
+      box-shadow: 0 20px 80px rgba(0,0,0,0.6);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    @media (max-width: 480px) {
+      body { padding: 0; background: var(--bg); }
+      .phone-container {
+        width: 100%; height: 100vh; border-radius: 0; box-shadow: none;
+      }
+    }
+
+    #app { width: 100%; height: 100%; display: flex; flex-direction: column; }
 
     /* Login */
     .login-page { display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; padding: 32px; background: var(--bg); }
@@ -172,6 +193,7 @@
 </head>
 <body>
   <div id="app">
+    <div class="phone-container">
     <!-- LOGIN -->
     <template v-if="currentPage === 'login'">
       <div class="login-page">
@@ -644,6 +666,7 @@
         <div style="font-size: 12px; color: var(--text-light); margin-top: 16px;">版本 1.0.0</div>
       </div>
     </el-dialog>
+  </div>
   </div>
 
   <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
