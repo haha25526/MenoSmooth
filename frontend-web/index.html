@@ -43,7 +43,7 @@
       }
     }
 
-    #app { width: 100%; height: 100%; display: flex; flex-direction: column; }
+    #app { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; }
 
     /* Login */
     .login-page { display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; padding: 32px; background: var(--bg); }
@@ -380,8 +380,8 @@
           <!-- Record sub-page: SCALE TESTS -->
           <template v-if="recordSubPage === 'scale-tests'">
             <div class="sub-body">
-              <!-- 两个量表横向并排 -->
-              <div class="scale-types-row">
+              <!-- 类型选择（未进行时显示） -->
+              <div v-if="!kuppermanTaking && !hormoneTaking" class="scale-types-row">
                 <button class="scale-type-card" @click="scaleTestType = 'kupperman'; startKupperman()">
                   <div class="rec-ico purple">📋</div>
                   <div style="flex:1;">
@@ -389,7 +389,7 @@
                     <div style="font-size:11px;color:var(--text-mid);">更年期症状评分 · 10题</div>
                   </div>
                 </button>
-                <button class="scale-type-card" @click="scaleTestType = 'hormone'; showHormoneForm = true">
+                <button class="scale-type-card" @click="scaleTestType = 'hormone'; startHormone()">
                   <div class="rec-ico pink">💊</div>
                   <div style="flex:1;">
                     <div style="font-size:14px;font-weight:600;color:var(--text-dark);">荷尔蒙评估</div>
@@ -398,8 +398,12 @@
                 </button>
               </div>
 
-              <!-- Kupperman test -->
-              <template v-if="scaleTestType === 'kupperman' && kuppermanTaking">
+              <!-- Kupperman test (inline) -->
+              <template v-if="kuppermanTaking">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                  <div style="font-size: 15px; font-weight: 600; color: var(--text-dark);">Kupperman 评估</div>
+                  <button @click="kuppermanTaking = false" style="background: none; border: 1px solid var(--border); border-radius: 8px; padding: 4px 12px; font-size: 12px; color: var(--text-mid); cursor: pointer;">返回</button>
+                </div>
                 <div v-for="q in kuppermanQuestions" :key="q.id" class="scale-question">
                   <div class="sq-label">{{ q.label }}</div>
                   <div class="sq-options">
@@ -411,8 +415,12 @@
                 <el-button type="primary" @click="submitKupperman" block size="large">提交评估</el-button>
               </template>
 
-              <!-- Hormone test -->
-              <template v-if="scaleTestType === 'hormone' && hormoneTaking">
+              <!-- Hormone test (inline) -->
+              <template v-if="hormoneTaking">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                  <div style="font-size: 15px; font-weight: 600; color: var(--text-dark);">荷尔蒙评估</div>
+                  <button @click="hormoneTaking = false" style="background: none; border: 1px solid var(--border); border-radius: 8px; padding: 4px 12px; font-size: 12px; color: var(--text-mid); cursor: pointer;">返回</button>
+                </div>
                 <div style="display: flex; gap: 6px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 4px;">
                   <div v-for="(dim, idx) in hormoneQuestions.dimensions" :key="idx"
                        class="hormone-dim-tab"
