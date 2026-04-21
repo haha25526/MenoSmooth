@@ -158,6 +158,18 @@
     .avatar-opt { width: 48px; height: 48px; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 2px solid transparent; box-shadow: 0 1px 3px rgba(0,0,0,0.08); overflow: hidden; }
     .avatar-opt.selected { border-color: var(--primary); }
 
+    /* Element Plus dialog override: constrain to phone container */
+    .el-overlay { backdrop-filter: blur(4px) !important; }
+    .el-dialog__wrapper { position: fixed !important; }
+    @media (min-width: 481px) {
+      .el-dialog {
+        width: 340px !important;
+        max-width: 90vw !important;
+        border-radius: 16px !important;
+      }
+      .el-dialog.is-fullscreen { width: 340px !important; }
+    }
+
     /* Scale test */
     .scale-question { background: var(--card-bg); border-radius: 12px; padding: 14px; margin-bottom: 12px; border: 1px solid var(--border); }
     .scale-question .sq-label { font-size: 14px; font-weight: 500; color: var(--text-dark); margin-bottom: 10px; }
