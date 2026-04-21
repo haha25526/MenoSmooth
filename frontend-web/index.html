@@ -44,10 +44,10 @@
     .main-header .back-btn { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); background: none; border: none; color: white; font-size: 20px; cursor: pointer; }
 
     /* Tab Content */
-    .tab-content { flex: 1; padding: 16px; padding-bottom: 70px; overflow-y: auto; }
+    .tab-content { flex: 1; padding: 0; padding-bottom: 56px; overflow: hidden; position: relative; }
 
     /* Chat */
-    .chat-container { display: flex; flex-direction: column; height: calc(100vh - 120px); }
+    .chat-container { display: flex; flex-direction: column; height: 100%; }
     .chat-messages { flex: 1; overflow-y: auto; padding: 8px 0; }
     .chat-input-area { padding: 8px 0; background: white; border-radius: 12px; display: flex; gap: 8px; align-items: center; }
     .msg-row { display: flex; margin-bottom: 16px; align-items: flex-start; }
@@ -81,7 +81,7 @@
     .sub-body { padding: 16px; }
 
     /* Hero banner (records tab) */
-    .hero-banner { height: 180px; background: linear-gradient(135deg, #9B1C44 0%, #C4335E 50%, #D44F7E 100%); position: relative; overflow: hidden; margin: -16px -16px 0; }
+    .hero-banner { height: 180px; background: linear-gradient(135deg, #9B1C44 0%, #C4335E 50%, #D44F7E 100%); position: relative; overflow: hidden; }
     .hero-banner::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 30%, rgba(0,0,0,0.25)); }
     .hero-banner .hero-text { position: absolute; bottom: 16px; left: 20px; color: white; z-index: 1; }
     .hero-banner .hero-text h3 { font-size: 22px; font-weight: 700; }
@@ -109,6 +109,22 @@
     .record-sub-nav { display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; }
     .record-sub-btn { padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border); background: white; font-size: 13px; color: var(--text-mid); cursor: pointer; white-space: nowrap; transition: all 0.2s; }
     .record-sub-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+    /* Quick action grid (金刚位) */
+    .quick-actions { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 16px; }
+    .quick-cell { background: var(--card-bg); border-radius: 16px; padding: 20px 12px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 8px; border: none; font-family: inherit; transition: transform 0.15s, box-shadow 0.15s; }
+    .quick-cell:active { transform: scale(0.97); box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+    .quick-icon { font-size: 28px; }
+    .quick-label { font-size: 13px; font-weight: 600; color: var(--text-dark); }
+
+    /* Scale types row (side by side) */
+    .scale-types-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+    .scale-type-card { display: flex; align-items: center; gap: 10px; background: var(--card-bg); border-radius: 14px; padding: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); cursor: pointer; border: none; font-family: inherit; text-align: left; transition: transform 0.15s; }
+    .scale-type-card:active { transform: scale(0.97); }
+    .scale-type-card .rec-ico { width: 40px; height: 40px; border-radius: 12px; }
+
+    /* About profile button */
+    .about-profile-btn { width: 100%; margin-top: 16px; }
 
     /* Forms */
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -270,14 +286,17 @@
 
           <!-- Record sub-page: LAB TESTS -->
           <template v-if="recordSubPage === 'lab-tests'">
-            <div class="sub-header">
-              <button class="sub-back" @click="recordSubPage = null">‹</button>
-              <div><div class="sub-title">体检化验</div><div class="sub-sub">上传或手动录入化验结果</div></div>
-            </div>
             <div class="sub-body">
-              <div class="sub-actions">
-                <el-button @click="showLabUpload = true">📷 上传化验单</el-button>
-                <el-button @click="showLabForm = true">✏️ 手动录入</el-button>
+              <!-- 金刚位 -->
+              <div class="quick-actions">
+                <button class="quick-cell" @click="showLabUpload = true">
+                  <span class="quick-icon">📷</span>
+                  <span class="quick-label">上传化验单</span>
+                </button>
+                <button class="quick-cell" @click="showLabForm = true">
+                  <span class="quick-icon">✏️</span>
+                  <span class="quick-label">手动录入</span>
+                </button>
               </div>
               <div v-if="labTests.length > 0">
                 <div class="hist-title">历史记录</div>
@@ -304,14 +323,17 @@
 
           <!-- Record sub-page: DAILY METRICS -->
           <template v-if="recordSubPage === 'daily-metrics'">
-            <div class="sub-header">
-              <button class="sub-back" @click="recordSubPage = null">‹</button>
-              <div><div class="sub-title">日常数据</div><div class="sub-sub">记录每日健康指标</div></div>
-            </div>
             <div class="sub-body">
-              <div class="sub-actions">
-                <el-button @click="showDailyUpload = true">📷 上传截图</el-button>
-                <el-button @click="showDailyForm = true">✏️ 手动录入</el-button>
+              <!-- 金刚位 -->
+              <div class="quick-actions">
+                <button class="quick-cell" @click="showDailyUpload = true">
+                  <span class="quick-icon">📷</span>
+                  <span class="quick-label">上传截图</span>
+                </button>
+                <button class="quick-cell" @click="showDailyForm = true">
+                  <span class="quick-icon">✏️</span>
+                  <span class="quick-label">手动录入</span>
+                </button>
               </div>
               <div v-if="dailyMetrics.length > 0">
                 <div class="hist-title">历史记录</div>
@@ -335,76 +357,70 @@
 
           <!-- Record sub-page: SCALE TESTS -->
           <template v-if="recordSubPage === 'scale-tests'">
-            <div class="sub-header">
-              <button class="sub-back" @click="recordSubPage = null">‹</button>
-              <div><div class="sub-title">量表测试</div><div class="sub-sub">选择量表开始评估</div></div>
-            </div>
             <div class="sub-body">
-              <div class="record-tools" style="margin-bottom: 16px;">
-                <button class="rec-btn" @click="scaleTestType = 'kupperman'">
+              <!-- 两个量表横向并排 -->
+              <div class="scale-types-row">
+                <button class="scale-type-card" @click="scaleTestType = 'kupperman'; startKupperman()">
                   <div class="rec-ico purple">📋</div>
-                  <div class="rec-text"><h3>Kupperman 评估</h3><p>更年期症状评分 · 10题</p></div>
-                  <div class="rec-arrow">›</div>
+                  <div style="flex:1;">
+                    <div style="font-size:14px;font-weight:600;color:var(--text-dark);">Kupperman</div>
+                    <div style="font-size:11px;color:var(--text-mid);">更年期症状评分 · 10题</div>
+                  </div>
                 </button>
-                <button class="rec-btn" @click="scaleTestType = 'hormone'">
+                <button class="scale-type-card" @click="scaleTestType = 'hormone'; showHormoneForm = true">
                   <div class="rec-ico pink">💊</div>
-                  <div class="rec-text"><h3>荷尔蒙评估</h3><p>多维度健康评估 · 26题</p></div>
-                  <div class="rec-arrow">›</div>
+                  <div style="flex:1;">
+                    <div style="font-size:14px;font-weight:600;color:var(--text-dark);">荷尔蒙评估</div>
+                    <div style="font-size:11px;color:var(--text-mid);">多维度健康评估 · 26题</div>
+                  </div>
                 </button>
               </div>
 
-              <template v-if="scaleTestType === 'kupperman'">
-                <template v-if="!kuppermanTaking">
-                  <el-button @click="startKupperman" block size="large" type="primary" style="margin-bottom: 16px;">开始 Kupperman 评估</el-button>
-                </template>
-                <template v-if="kuppermanTaking">
-                  <div v-for="q in kuppermanQuestions" :key="q.id" class="scale-question">
+              <!-- Kupperman test -->
+              <template v-if="scaleTestType === 'kupperman' && kuppermanTaking">
+                <div v-for="q in kuppermanQuestions" :key="q.id" class="scale-question">
+                  <div class="sq-label">{{ q.label }}</div>
+                  <div class="sq-options">
+                    <div v-for="opt in q.options" :key="opt.score" class="sq-opt" :class="{ selected: kuppermanAnswers[q.id] === opt.score }" @click="kuppermanAnswers[q.id] = opt.score">
+                      {{ opt.label }}
+                    </div>
+                  </div>
+                </div>
+                <el-button type="primary" @click="submitKupperman" block size="large">提交评估</el-button>
+              </template>
+
+              <!-- Hormone test -->
+              <template v-if="scaleTestType === 'hormone' && hormoneTaking">
+                <div style="display: flex; gap: 6px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 4px;">
+                  <div v-for="(dim, idx) in hormoneQuestions.dimensions" :key="idx"
+                       class="hormone-dim-tab"
+                       :class="{ active: hormoneCurrentDim === idx }"
+                       @click="hormoneCurrentDim = idx">
+                    {{ dim.name.split('(')[0] }}
+                  </div>
+                </div>
+                <div v-if="hormoneQuestions.dimensions[hormoneCurrentDim]" :key="hormoneCurrentDim">
+                  <div style="font-size: 12px; color: var(--text-mid); margin-bottom: 8px;">
+                    {{ hormoneQuestions.dimensions[hormoneCurrentDim].name }}
+                  </div>
+                  <div v-for="q in hormoneQuestions.dimensions[hormoneCurrentDim].questions" :key="q.id" class="scale-question">
                     <div class="sq-label">{{ q.label }}</div>
                     <div class="sq-options">
-                      <div v-for="opt in q.options" :key="opt.score" class="sq-opt" :class="{ selected: kuppermanAnswers[q.id] === opt.score }" @click="kuppermanAnswers[q.id] = opt.score">
+                      <div v-for="opt in q.options" :key="opt.score" class="sq-opt" :class="{ selected: hormoneAnswers[q.id] === opt.score }" @click="hormoneAnswers[q.id] = opt.score">
                         {{ opt.label }}
                       </div>
                     </div>
                   </div>
-                  <el-button type="primary" @click="submitKupperman" block size="large">提交评估</el-button>
-                </template>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 12px;">
+                  <el-button @click="hormonePrevDim" :disabled="hormoneCurrentDim === 0" style="flex: 1;">上一组</el-button>
+                  <el-button v-if="hormoneCurrentDim < hormoneQuestions.dimensions.length - 1"
+                             type="primary" @click="hormoneNextDim" style="flex: 1;">下一组</el-button>
+                  <el-button v-else type="primary" @click="submitHormone" style="flex: 1;">提交评估</el-button>
+                </div>
               </template>
 
-              <template v-if="scaleTestType === 'hormone'">
-                <template v-if="!hormoneTaking">
-                  <el-button @click="showHormoneForm = true" block size="large" type="primary" style="margin-bottom: 16px;">开始荷尔蒙评估</el-button>
-                </template>
-                <template v-if="hormoneTaking">
-                  <div style="display: flex; gap: 6px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 4px;">
-                    <div v-for="(dim, idx) in hormoneQuestions.dimensions" :key="idx"
-                         class="hormone-dim-tab"
-                         :class="{ active: hormoneCurrentDim === idx }"
-                         @click="hormoneCurrentDim = idx">
-                      {{ dim.name.split('(')[0] }}
-                    </div>
-                  </div>
-                  <div v-if="hormoneQuestions.dimensions[hormoneCurrentDim]" :key="hormoneCurrentDim">
-                    <div style="font-size: 12px; color: var(--text-mid); margin-bottom: 8px;">
-                      {{ hormoneQuestions.dimensions[hormoneCurrentDim].name }}
-                    </div>
-                    <div v-for="q in hormoneQuestions.dimensions[hormoneCurrentDim].questions" :key="q.id" class="scale-question">
-                      <div class="sq-label">{{ q.label }}</div>
-                      <div class="sq-options">
-                        <div v-for="opt in q.options" :key="opt.score" class="sq-opt" :class="{ selected: hormoneAnswers[q.id] === opt.score }" @click="hormoneAnswers[q.id] = opt.score">
-                          {{ opt.label }}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div style="display: flex; gap: 10px; margin-top: 12px;">
-                    <el-button @click="hormonePrevDim" :disabled="hormoneCurrentDim === 0" style="flex: 1;">上一组</el-button>
-                    <el-button v-if="hormoneCurrentDim < hormoneQuestions.dimensions.length - 1"
-                               type="primary" @click="hormoneNextDim" style="flex: 1;">下一组</el-button>
-                    <el-button v-else type="primary" @click="submitHormone" style="flex: 1;">提交评估</el-button>
-                  </div>
-                </template>
-              </template>
-
+              <!-- Scale test history -->
               <div v-if="scaleTests.length > 0" style="margin-top: 16px;">
                 <div class="hist-title">历史评估</div>
                 <div class="record-list">
@@ -455,44 +471,34 @@
 
         <!-- ====== TAB 3: 关于 ====== -->
         <template v-if="currentTab === 'about'">
-          <!-- Profile section -->
-          <div class="avatar-section">
-            <div class="avatar-big">
-              <img :src="avatarDisplay" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" />
-            </div>
-            <div style="margin-top: 8px; font-size: 16px; font-weight: 600;">{{ user?.nickname }}</div>
-          </div>
-          <div style="background: white; border-radius: 12px; padding: 16px; margin-bottom: 16px;">
-            <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f0f0f0;">
-              <span style="color: #999;">手机</span><span>{{ user?.phone }}</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f0f0f0;">
-              <span style="color: #999;">生日</span><span>{{ user?.birthday || '未设置' }}</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f0f0f0;">
-              <span style="color: #999;">性别</span><span>女性</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 10px 0;">
-              <span style="color: #999;">身高</span><span>{{ user?.height ? user.height + ' cm' : '未设置' }}</span>
-            </div>
-          </div>
-          <el-button @click="currentTab = 'records'; recordSubPage = null; goToSub('profile-setup')" block style="margin-bottom: 12px;">编辑资料</el-button>
+          <div style="padding: 16px;">
+            <!-- Profile card (clickable) -->
+            <button class="rec-btn about-profile-btn" @click="goToProfileSetup">
+              <div style="overflow: hidden; flex-shrink: 0;">
+                <img :src="avatarDisplay" style="width: 48px; height: 48px; object-fit: cover; border-radius: 50%;" />
+              </div>
+              <div class="rec-text" style="text-align:left;">
+                <h3>{{ user?.nickname }}</h3>
+                <p>{{ user?.phone }}</p>
+              </div>
+              <div class="rec-arrow">›</div>
+            </button>
 
-          <!-- About section -->
-          <div style="background: white; border-radius: 12px; padding: 20px; margin-bottom: 16px; text-align: center;">
-            <div style="font-size: 18px; margin-bottom: 8px;">🌸 更年不期</div>
-            <div style="font-size: 13px; color: var(--text-mid); line-height: 1.8;">
-              更年不期是一款专为更年期女性设计的健康陪伴工具。<br>
-              提供体检数据记录、日常健康监测、专业量表评估<br>
-              以及AI健康顾问服务，帮助你安心度过每一程。
-            </div>
-            <div style="font-size: 12px; color: var(--text-light); margin-top: 12px;">版本 1.0.0</div>
-          </div>
+            <!-- About card -->
+            <button class="rec-btn" style="margin-top: 12px;" @click="showAboutInfo = true">
+              <div class="rec-ico purple">🌸</div>
+              <div class="rec-text"><h3>关于更年不期</h3><p>了解更多关于我们</p></div>
+              <div class="rec-arrow">›</div>
+            </button>
 
-          <el-button type="danger" @click="handleLogout" block>退出登录</el-button>
+            <!-- Logout card -->
+            <button class="rec-btn" style="margin-top: 12px;" @click="handleLogout">
+              <div class="rec-ico pink">🚪</div>
+              <div class="rec-text"><h3>退出登录</h3><p>切换账户或退出当前账号</p></div>
+              <div class="rec-arrow">›</div>
+            </button>
+          </div>
         </template>
-      </div>
-
       <!-- Bottom Tab Bar -->
       <div class="tab-bar">
         <div class="tab-item" :class="{ active: currentTab === 'records' }" @click="switchTab('records')">
@@ -624,6 +630,20 @@
         </div>
       </div>
     </el-dialog>
+
+    <!-- About info dialog -->
+    <el-dialog v-model="showAboutInfo" title="关于更年不期" width="90%">
+      <div style="text-align: center; padding: 10px 0;">
+        <div style="font-size: 24px; margin-bottom: 12px;">🌸</div>
+        <div style="font-size: 16px; font-weight: 600; margin-bottom: 8px;">更年不期</div>
+        <div style="font-size: 13px; color: var(--text-mid); line-height: 1.8;">
+          更年不期是一款专为更年期女性设计的健康陪伴工具。<br>
+          提供体检数据记录、日常健康监测、专业量表评估<br>
+          以及AI健康顾问服务，帮助你安心度过每一程。
+        </div>
+        <div style="font-size: 12px; color: var(--text-light); margin-top: 16px;">版本 1.0.0</div>
+      </div>
+    </el-dialog>
   </div>
 
   <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
@@ -640,6 +660,7 @@
         const currentTab = ref('chat'); // Default landing tab after login
         const recordSubPage = ref(null); // lab-tests, daily-metrics, scale-tests
         const scaleTestType = ref('kupperman');
+        const showAboutInfo = ref(false);
 
         const user = ref(null);
         const messages = ref([]);
@@ -967,6 +988,16 @@
           ElementPlus.ElMessage.success('已退出登录');
         }
 
+        function goToProfileSetup() {
+          if (user.value) {
+            profileForm.nickname = user.value.nickname || '';
+            profileForm.birthday = user.value.birthday || '';
+            profileForm.height = user.value.height || 160;
+            profileForm.avatar = user.value.avatar || '';
+          }
+          currentPage.value = 'profile-setup';
+        }
+
         // File upload handlers
         const handleLabUploadClick = () => {
           const input = document.createElement('input');
@@ -1027,7 +1058,7 @@
         });
 
         return {
-          currentPage, currentTab, recordSubPage, scaleTestType,
+          currentPage, currentTab, recordSubPage, scaleTestType, showAboutInfo,
           user, messages, chatInput, chatLoading, chatScroll, pageTitle,
           loginForm, sendingCode, codeBtnText, loggingIn, isValidPhone, sendCode, handleLogin,
           profileForm, showAvatarPicker, avatarOptions, avatarDisplay, saveProfile, handleAvatarUpload,
@@ -1037,7 +1068,7 @@
           showHormoneForm, hormoneTaking, hormoneCurrentDim, hormoneQuestions, hormoneAnswers,
           startHormone, hormoneNextDim, hormonePrevDim, submitHormone,
           showHormoneResult, hormoneResult, deleteScaleTest,
-          switchTab, loadChatHistory, sendMessage, handleLogout,
+          switchTab, loadChatHistory, sendMessage, handleLogout, goToProfileSetup,
         };
       }
     }).use(ElementPlus).mount('#app');
