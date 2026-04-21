@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>更年不期</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌸</text></svg>">
+  <link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background: #FFF5F5; min-height: 100vh; }
+    #app { max-width: 480px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; }
+    .page { flex: 1; padding: 16px; }
+
+    /* Login Page */
+    .login-page { display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; padding: 32px; background: linear-gradient(135deg, #FFF5F5 0%, #FFE4E1 50%, #F5EEF8 100%); }
+    .login-logo { font-size: 64px; margin-bottom: 12px; }
+    .login-title { font-size: 28px; font-weight: bold; color: #8B4585; margin-bottom: 4px; }
+    .login-subtitle { font-size: 14px; color: #B8860B; margin-bottom: 40px; }
+    .login-form { width: 100%; max-width: 320px; }
+    .login-form .el-input { margin-bottom: 16px; }
+
+    /* Main Layout */
+    .main-header { background: linear-gradient(135deg, #D4A0C7, #E8B4B8); color: white; padding: 16px; text-align: center; border-radius: 0 0 20px 20px; }
+    .main-header h2 { font-size: 18px; font-weight: 600; }
+    .tab-bar { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #f0f0f0; display: flex; z-index: 100; max-width: 480px; margin: 0 auto; }
+    .tab-item { flex: 1; text-align: center; padding: 8px 0; font-size: 10px; color: #999; cursor: pointer; transition: color 0.2s; }
+    .tab-item .tab-icon { font-size: 22px; display: block; margin-bottom: 2px; }
+    .tab-item.active { color: #D4A0C7; }
+    .tab-content { flex: 1; padding: 16px; padding-bottom: 70px; }
+
+    /* Home */
+    .home-greeting { background: linear-gradient(135deg, #F5EEF8, #FDE8E8); border-radius: 16px; padding: 20px; margin-bottom: 16px; }
+    .home-greeting h3 { color: #8B4585; margin-bottom: 4px; }
+    .home-greeting p { color: #999; font-size: 13px; }
+    .nav-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+    .nav-card { background: white; border-radius: 12px; padding: 16px 12px; text-align: center; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    .nav-card:active { transform: scale(0.96); }
+    .nav-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .nav-card .nav-icon { font-size: 32px; margin-bottom: 8px; }
+    .nav-card .nav-label { font-size: 13px; color: #333; font-weight: 500; }
+    .recent-section h4 { font-size: 15px; color: #333; margin-bottom: 12px; }
+    .recent-item { background: white; border-radius: 10px; padding: 12px; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; }
+    .recent-item .ri-icon { width: 40px; height: 40px; border-radius: 10px; background: #F5EEF8; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+    .recent-item .ri-info { flex: 1; }
+    .recent-item .ri-title { font-size: 14px; color: #333; font-weight: 500; }
+    .recent-item .ri-date { font-size: 12px; color: #999; }
+
+    /* Chat */
+    .chat-container { display: flex; flex-direction: column; height: calc(100vh - 130px); }
+    .chat-messages { flex: 1; overflow-y: auto; padding: 8px 0; }
+    .chat-input-area { padding: 8px 0; background: white; border-radius: 12px; display: flex; gap: 8px; align-items: center; }
+    .msg-row { display: flex; margin-bottom: 16px; align-items: flex-start; }
+    .msg-row.user { flex-direction: row-reverse; }
+    .msg-avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+    .msg-row.assistant .msg-avatar { background: #F5EEF8; }
+    .msg-row.user .msg-avatar { background: #E8B4B8; }
+    .msg-bubble { max-width: 75%; padding: 10px 14px; border-radius: 16px; font-size: 14px; line-height: 1.6; word-break: break-word; white-space: pre-wrap; }
+    .msg-row.assistant .msg-bubble { background: white; margin-left: 8px; border-bottom-left-radius: 4px; }
+    .msg-row.user .msg-bubble { background: #D4A0C7; color: white; margin-right: 8px; border-bottom-right-radius: 4px; }
+
+    /* Record pages */
+    .record-header { display: flex; gap: 10px; margin-bottom: 16px; }
+    .record-header .el-button { flex: 1; }
+    .record-list { display: flex; flex-direction: column; gap: 8px; }
+    .record-card { background: white; border-radius: 12px; padding: 14px; position: relative; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+    .record-card .rc-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .record-card .rc-date { font-size: 12px; color: #999; }
+    .record-card .rc-data { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; }
+    .record-card .rc-item { background: #F8F5FF; border-radius: 8px; padding: 8px; text-align: center; }
+    .record-card .rc-label { font-size: 11px; color: #999; }
+    .record-card .rc-value { font-size: 16px; font-weight: 600; color: #8B4585; }
+    .record-card .rc-delete { position: absolute; top: 10px; right: 10px; cursor: pointer; color: #ccc; font-size: 18px; }
+    .record-card .rc-delete:hover { color: #E74C3C; }
+    .record-card .rc-notes { font-size: 12px; color: #666; margin-top: 8px; padding-top: 8px; border-top: 1px solid #f0f0f0; }
+
+    /* Manual form dialog */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .form-full { grid-column: 1 / -1; }
+
+    /* Profile */
+    .avatar-section { text-align: center; padding: 20px 0; }
+    .avatar-big { width: 80px; height: 80px; border-radius: 50%; background: #F5EEF8; display: inline-flex; align-items: center; justify-content: center; font-size: 36px; cursor: pointer; }
+    .avatar-options { display: flex; gap: 12px; justify-content: center; margin-top: 12px; }
+    .avatar-opt { width: 48px; height: 48px; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; border: 2px solid transparent; }
+    .avatar-opt.selected { border-color: #D4A0C7; }
+
+    /* Scale test */
+    .scale-question { background: white; border-radius: 12px; padding: 14px; margin-bottom: 12px; }
+    .scale-question .sq-label { font-size: 14px; font-weight: 500; color: #333; margin-bottom: 10px; }
+    .scale-question .sq-options { display: flex; flex-direction: column; gap: 8px; }
+    .scale-question .sq-opt { padding: 10px 14px; border: 1px solid #e8e8e8; border-radius: 8px; cursor: pointer; transition: all 0.2s; font-size: 13px; }
+    .scale-question .sq-opt:hover { border-color: #D4A0C7; background: #FFF5F8; }
+    .scale-question .sq-opt.selected { border-color: #D4A0C7; background: #F5EEF8; color: #8B4585; font-weight: 500; }
+    .scale-result { text-align: center; padding: 20px; background: linear-gradient(135deg, #F5EEF8, #FDE8E8); border-radius: 16px; margin-bottom: 16px; }
+    .scale-result .sr-score { font-size: 48px; font-weight: bold; color: #8B4585; }
+    .scale-result .sr-level { font-size: 16px; color: #666; margin-top: 4px; }
+
+    .empty-state { text-align: center; padding: 40px 20px; color: #ccc; }
+    .empty-state .empty-icon { font-size: 48px; margin-bottom: 8px; }
+
+    /* Loading overlay */
+    .loading-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; z-index: 999; }
+
+    .el-button--primary { background: #D4A0C7 !important; border-color: #D4A0C7 !important; }
+    .el-button--primary:hover { background: #C490B7 !important; border-color: #C490B7 !important; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <template v-if="currentPage === 'login'">
+      <div class="login-page">
+        <div class="login-logo">🌸</div>
+        <div class="login-title">更年不期</div>
+        <div class="login-subtitle">温暖陪伴，安心度过每一程</div>
+        <div class="login-form">
+          <el-input v-model="loginForm.phone" placeholder="请输入手机号" maxlength="11" clearable prefix-icon="Phone" />
+          <el-input v-model="loginForm.code" placeholder="请输入验证码" maxlength="4" clearable style="width: 65%; display: inline-block; margin-right: 8px;">
+          </el-input>
+          <el-button @click="sendCode" :disabled="sendingCode || !isValidPhone" :loading="sendingCode" style="width: 33%;">
+            {{ codeBtnText }}
+          </el-button>
+          <el-button type="primary" @click="handleLogin" :loading="loggingIn" size="large" block>
+            登录 / 注册
+          </el-button>
+          <div style="text-align: center; margin-top: 16px; font-size: 12px; color: #999;">
+            测试账号：13712345678，验证码 1234
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <template v-else-if="currentPage === 'profile-setup'">
+      <div class="page" style="background: linear-gradient(135deg, #FFF5F5, #F5EEF8); min-height: 100vh;">
+        <h3 style="text-align: center; color: #8B4585; margin-bottom: 20px;">完善个人资料</h3>
+
+        <div class="avatar-section">
+          <div class="avatar-big" @click="showAvatarPicker = true">
+            {{ avatarDisplay }}
+          </div>
+          <div class="avatar-options">
+            <div v-for="av in avatarOptions" :key="av" class="avatar-opt" :class="{ selected: profileForm.avatar === av }" @click="profileForm.avatar = av">
+              {{ av }}
+            </div>
+          </div>
+          <input type="file" accept="image/*" ref="avatarFileInput" @change="handleAvatarUpload" style="display: none;">
+          <el-button size="small" @click="$refs.avatarFileInput.click()" style="margin-top: 8px;">或上传照片</el-button>
+        </div>
+
+        <el-form :model="profileForm" label-position="top" style="max-width: 320px; margin: 0 auto;">
+          <el-form-item label="昵称">
+            <el-input v-model="profileForm.nickname" placeholder="给自己取个昵称" />
+          </el-form-item>
+          <el-form-item label="出生日期">
+            <el-date-picker v-model="profileForm.birthday" type="date" placeholder="选择日期" format="YYYY-MM-DD" value-format="YYYY-MM-DD" style="width: 100%;" />
+          </el-form-item>
+          <el-form-item label="性别">
+            <el-input value="女性" disabled />
+          </el-form-item>
+          <el-form-item label="身高 (cm)">
+            <el-input-number v-model="profileForm.height" :min="100" :max="200" :step="1" style="width: 100%;" />
+          </el-form-item>
+          <el-button type="primary" @click="saveProfile" block size="large" style="margin-top: 16px;">保存并开始</el-button>
+        </el-form>
+
+        <el-dialog v-model="showAvatarPicker" title="选择头像" width="200px" :modal="false">
+          <div style="text-align: center;">
+            <div v-for="av in avatarOptions" :key="av" style="font-size: 40px; padding: 8px; cursor: pointer;" @click="profileForm.avatar = av; showAvatarPicker = false">
+              {{ av }}
+            </div>
+          </div>
+        </el-dialog>
+      </div>
+    </template>
+
+    <template v-else>
+      <!-- Header -->
+      <div class="main-header">
+        <h2>{{ pageTitle }}</h2>
+      </div>
+
+      <!-- Tab Content -->
+      <div class="tab-content">
+        <!-- HOME -->
+        <template v-if="currentPage === 'home'">
+          <div class="home-greeting">
+            <h3>Hi, {{ user?.nickname || '更年期姐妹' }} 👋</h3>
+            <p>今天感觉怎么样？有什么想聊的吗？</p>
+          </div>
+          <div class="nav-grid">
+            <div class="nav-card" @click="goTo('chat')">
+              <div class="nav-icon">💬</div>
+              <div class="nav-label">AI 对话</div>
+            </div>
+            <div class="nav-card" @click="goTo('lab-tests')">
+              <div class="nav-icon">🧪</div>
+              <div class="nav-label">体检化验</div>
+            </div>
+            <div class="nav-card" @click="goTo('daily-metrics')">
+              <div class="nav-icon">📊</div>
+              <div class="nav-label">日常数据</div>
+            </div>
+            <div class="nav-card" @click="goTo('scale-tests')">
+              <div class="nav-icon">📝</div>
+              <div class="nav-label">量表测试</div>
+            </div>
+            <div class="nav-card" @click="goTo('profile')">
+              <div class="nav-icon">👤</div>
+              <div class="nav-label">我的</div>
+            </div>
+          </div>
+        </template>
+
+        <!-- CHAT -->
+        <template v-if="currentPage === 'chat'">
+          <div class="chat-container">
+            <div class="chat-messages" ref="chatScroll">
+              <div v-if="messages.length === 0" class="empty-state">
+                <div class="empty-icon">🤗</div>
+                <p>你好，我是小更，你的更年期健康顾问</p>
+                <p>有什么关于更年期的问题，都可以问我</p>
+              </div>
+              <div v-for="msg in messages" :key="msg.id" class="msg-row" :class="msg.role">
+                <div class="msg-avatar">{{ msg.role === 'user' ? '👩' : '🌸' }}</div>
+                <div class="msg-bubble">{{ msg.content }}</div>
+              </div>
+              <div v-if="chatLoading" class="msg-row assistant">
+                <div class="msg-avatar">🌸</div>
+                <div class="msg-bubble">正在思考...</div>
+              </div>
+            </div>
+            <div class="chat-input-area">
+              <el-input v-model="chatInput" placeholder="输入你的问题..." @keyup.enter="sendMessage" clearable style="flex: 1;" />
+              <el-button type="primary" @click="sendMessage" :loading="chatLoading" circle>➤</el-button>
+            </div>
+          </div>
+        </template>
+
+        <!-- LAB TESTS -->
+        <template v-if="currentPage === 'lab-tests'">
+          <div class="record-header">
+            <el-button @click="showLabUpload = true">📷 上传化验单</el-button>
+            <el-button @click="showLabForm = true">✏️ 手动录入</el-button>
+          </div>
+          <div v-if="labTests.length === 0" class="empty-state">
+            <div class="empty-icon">🧪</div>
+            <p>还没有化验记录</p>
+          </div>
+          <div class="record-list" v-else>
+            <div v-for="t in labTests" :key="t.id" class="record-card">
+              <div class="rc-header">
+                <span class="rc-date">{{ t.test_date }}</span>
+              </div>
+              <div class="rc-data">
+                <div v-if="t.e2 != null" class="rc-item"><div class="rc-label">雌二醇 E2</div><div class="rc-value">{{ t.e2 }}</div></div>
+                <div v-if="t.fsh != null" class="rc-item"><div class="rc-label">促卵泡激素 FSH</div><div class="rc-value">{{ t.fsh }}</div></div>
+                <div v-if="t.lh != null" class="rc-item"><div class="rc-label">促黄体生成素 LH</div><div class="rc-value">{{ t.lh }}</div></div>
+                <div v-if="t.progesterone != null" class="rc-item"><div class="rc-label">黄体酮 P</div><div class="rc-value">{{ t.progesterone }}</div></div>
+                <div v-if="t.prolactin != null" class="rc-item"><div class="rc-label">催乳素 PRL</div><div class="rc-value">{{ t.prolactin }}</div></div>
+                <div v-if="t.calcium != null" class="rc-item"><div class="rc-label">钙 Ca</div><div class="rc-value">{{ t.calcium }}</div></div>
+                <div v-if="t.vitamin_d != null" class="rc-item"><div class="rc-label">维生素D</div><div class="rc-value">{{ t.vitamin_d }}</div></div>
+              </div>
+              <div v-if="t.notes" class="rc-notes">{{ t.notes }}</div>
+              <span class="rc-delete" @click="deleteLabTest(t.id)">🗑️</span>
+            </div>
+          </div>
+        </template>
+
+        <!-- DAILY METRICS -->
+        <template v-if="currentPage === 'daily-metrics'">
+          <div class="record-header">
+            <el-button @click="showDailyUpload = true">📷 上传截图</el-button>
+            <el-button @click="showDailyForm = true">✏️ 手动录入</el-button>
+          </div>
+          <div v-if="dailyMetrics.length === 0" class="empty-state">
+            <div class="empty-icon">📊</div>
+            <p>还没有日常数据记录</p>
+          </div>
+          <div class="record-list" v-else>
+            <div v-for="m in dailyMetrics" :key="m.id" class="record-card">
+              <div class="rc-header">
+                <span class="rc-date">{{ m.recorded_date }}</span>
+              </div>
+              <div class="rc-data">
+                <div v-if="m.weight != null" class="rc-item"><div class="rc-label">体重</div><div class="rc-value">{{ m.weight }} kg</div></div>
+                <div v-if="m.body_fat != null" class="rc-item"><div class="rc-label">体脂</div><div class="rc-value">{{ m.body_fat }}%</div></div>
+                <div v-if="m.temperature != null" class="rc-item"><div class="rc-label">体温</div><div class="rc-value">{{ m.temperature }}</div></div>
+                <div v-if="m.sleep_hours != null" class="rc-item"><div class="rc-label">睡眠</div><div class="rc-value">{{ m.sleep_hours }}h</div></div>
+              </div>
+              <div v-if="m.notes" class="rc-notes">{{ m.notes }}</div>
+              <span class="rc-delete" @click="deleteDailyMetric(m.id)">🗑️</span>
+            </div>
+          </div>
+        </template>
+
+        <!-- SCALE TESTS -->
+        <template v-if="currentPage === 'scale-tests'">
+          <div class="record-header">
+            <el-button @click="startKupperman">📋 Kupperman 评估</el-button>
+            <el-button @click="showHormoneForm = true">📋 荷尔蒙评估</el-button>
+          </div>
+
+          <!-- Kupperman taking -->
+          <template v-if="kuppermanTaking">
+            <div v-for="q in kuppermanQuestions" :key="q.id" class="scale-question">
+              <div class="sq-label">{{ q.label }}</div>
+              <div class="sq-options">
+                <div v-for="opt in q.options" :key="opt.score" class="sq-opt" :class="{ selected: kuppermanAnswers[q.id] === opt.score }" @click="kuppermanAnswers[q.id] = opt.score">
+                  {{ opt.label }}
+                </div>
+              </div>
+            </div>
+            <el-button type="primary" @click="submitKupperman" block size="large">提交评估</el-button>
+          </template>
+
+          <!-- Scale test history -->
+          <div v-if="!kuppermanTaking && scaleTests.length === 0" class="empty-state">
+            <div class="empty-icon">📝</div>
+            <p>还没有量表测试记录</p>
+          </div>
+          <div class="record-list" v-else-if="!kuppermanTaking">
+            <div v-for="t in scaleTests" :key="t.id" class="record-card">
+              <div class="rc-header">
+                <span class="rc-date">{{ t.test_date }} - {{ t.scale_type === 'kupperman' ? 'Kupperman' : '荷尔蒙评估' }}</span>
+              </div>
+              <div class="rc-data">
+                <div class="rc-item"><div class="rc-label">总分</div><div class="rc-value">{{ t.total_score }}</div></div>
+                <div v-if="t.severity_level" class="rc-item"><div class="rc-label">程度</div><div class="rc-value">{{ t.severity_level }}</div></div>
+              </div>
+              <span class="rc-delete" @click="deleteScaleTest(t.id)">🗑️</span>
+            </div>
+          </div>
+        </template>
+
+        <!-- PROFILE -->
+        <template v-if="currentPage === 'profile'">
+          <div class="avatar-section">
+            <div class="avatar-big">{{ avatarDisplay }}</div>
+            <div style="margin-top: 8px; font-size: 16px; font-weight: 600;">{{ user?.nickname }}</div>
+          </div>
+          <div style="background: white; border-radius: 12px; padding: 16px;">
+            <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f0f0f0;">
+              <span style="color: #999;">手机</span><span>{{ user?.phone }}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f0f0f0;">
+              <span style="color: #999;">生日</span><span>{{ user?.birthday || '未设置' }}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f0f0f0;">
+              <span style="color: #999;">性别</span><span>女性</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding: 10px 0;">
+              <span style="color: #999;">身高</span><span>{{ user?.height ? user.height + ' cm' : '未设置' }}</span>
+            </div>
+          </div>
+          <el-button @click="goTo('profile-setup')" block style="margin-top: 16px;">编辑资料</el-button>
+          <el-button type="danger" @click="handleLogout" block style="margin-top: 8px;">退出登录</el-button>
+        </template>
+      </div>
+
+      <!-- Tab Bar -->
+      <div class="tab-bar" v-if="currentPage !== 'chat' && currentPage !== 'profile-setup'">
+        <div class="tab-item" :class="{ active: currentPage === 'home' }" @click="goTo('home')">
+          <span class="tab-icon">🏠</span>首页
+        </div>
+        <div class="tab-item" :class="{ active: currentPage === 'lab-tests' }" @click="goTo('lab-tests')">
+          <span class="tab-icon">🧪</span>化验
+        </div>
+        <div class="tab-item" :class="{ active: currentPage === 'daily-metrics' }" @click="goTo('daily-metrics')">
+          <span class="tab-icon">📊</span>日常
+        </div>
+        <div class="tab-item" :class="{ active: currentPage === 'scale-tests' }" @click="goTo('scale-tests')">
+          <span class="tab-icon">📝</span>量表
+        </div>
+        <div class="tab-item" :class="{ active: currentPage === 'profile' }" @click="goTo('profile')">
+          <span class="tab-icon">👤</span>我的
+        </div>
+      </div>
+    </template>
+
+    <!-- Dialogs -->
+    <!-- Lab manual form -->
+    <el-dialog v-model="showLabForm" title="手动录入化验单" width="90%">
+      <div class="form-grid">
+        <el-form-item label="日期" class="form-full">
+          <el-date-picker v-model="labForm.test_date" type="date" format="YYYY-MM-DD" value-format="YYYY-MM-DD" style="width: 100%;" />
+        </el-form-item>
+        <el-form-item label="雌二醇 E2"><el-input-number v-model="labForm.e2" :step="0.1" controls-position="right" style="width: 100%;" /></el-form-item>
+        <el-form-item label="促卵泡激素 FSH"><el-input-number v-model="labForm.fsh" :step="0.1" controls-position="right" style="width: 100%;" /></el-form-item>
+        <el-form-item label="促黄体生成素 LH"><el-input-number v-model="labForm.lh" :step="0.1" controls-position="right" style="width: 100%;" /></el-form-item>
+        <el-form-item label="黄体酮 P"><el-input-number v-model="labForm.progesterone" :step="0.1" controls-position="right" style="width: 100%;" /></el-form-item>
+        <el-form-item label="催乳素 PRL"><el-input-number v-model="labForm.prolactin" :step="0.1" controls-position="right" style="width: 100%;" /></el-form-item>
+        <el-form-item label="钙 Ca"><el-input-number v-model="labForm.calcium" :step="0.1" controls-position="right" style="width: 100%;" /></el-form-item>
+        <el-form-item label="维生素D"><el-input-number v-model="labForm.vitamin_d" :step="0.1" controls-position="right" style="width: 100%;" /></el-form-item>
+        <el-form-item label="备注" class="form-full"><el-input v-model="labForm.notes" type="textarea" rows="2" /></el-form-item>
+      </div>
+      <el-button type="primary" @click="submitLabForm" block>保存</el-button>
+    </el-dialog>
+
+    <!-- Daily manual form -->
+    <el-dialog v-model="showDailyForm" title="手动录入日常数据" width="90%">
+      <div class="form-grid">
+        <el-form-item label="日期" class="form-full">
+          <el-date-picker v-model="dailyForm.recorded_date" type="date" format="YYYY-MM-DD" value-format="YYYY-MM-DD" style="width: 100%;" />
+        </el-form-item>
+        <el-form-item label="体重 (kg)"><el-input-number v-model="dailyForm.weight" :step="0.1" controls-position="right" style="width: 100%;" /></el-form-item>
+        <el-form-item label="体脂 (%)"><el-input-number v-model="dailyForm.body_fat" :step="0.1" controls-position="right" style="width: 100%;" /></el-form-item>
+        <el-form-item label="体温"><el-input-number v-model="dailyForm.temperature" :step="0.1" controls-position="right" style="width: 100%;" /></el-form-item>
+        <el-form-item label="睡眠时长 (h)"><el-input-number v-model="dailyForm.sleep_hours" :step="0.5" controls-position="right" style="width: 100%;" /></el-form-item>
+        <el-form-item label="备注" class="form-full"><el-input v-model="dailyForm.notes" type="textarea" rows="2" /></el-form-item>
+      </div>
+      <el-button type="primary" @click="submitDailyForm" block>保存</el-button>
+    </el-dialog>
+
+    <!-- Vision parse confirm dialogs -->
+    <el-dialog v-model="showLabConfirm" title="确认化验单数据" width="90%">
+      <p style="color: #999; font-size: 13px; margin-bottom: 12px;">AI 识别结果如下，请确认后保存：</p>
+      <div class="form-grid">
+        <el-form-item label="日期" class="form-full">
+          <el-date-picker v-model="labForm.test_date" type="date" format="YYYY-MM-DD" value-format="YYYY-MM-DD" style="width: 100%;" />
+        </el-form-item>
+        <el-form-item label="E2"><el-input-number v-model="labForm.e2" :step="0.1" controls-position="right" style="width: 100%;" /></el-form-item>
+        <el-form-item label="FSH"><el-input-number v-model="labForm.fsh" :step="0.1" controls-position="right" style="width: 100%;" /></el-form-item>
+        <el-form-item label="LH"><el-input-number v-model="labForm.lh" :step="0.1" controls-position="right" style="width: 100%;" /></el-form-item>
+        <el-form-item label="黄体酮"><el-input-number v-model="labForm.progesterone" :step="0.1" controls-position="right" style="width: 100%;" /></el-form-item>
+        <el-form-item label="催乳素"><el-input-number v-model="labForm.prolactin" :step="0.1" controls-position="right" style="width: 100%;" /></el-form-item>
+        <el-form-item label="钙"><el-input-number v-model="labForm.calcium" :step="0.1" controls-position="right" style="width: 100%;" /></el-form-item>
+        <el-form-item label="维生素D"><el-input-number v-model="labForm.vitamin_d" :step="0.1" controls-position="right" style="width: 100%;" /></el-form-item>
+      </div>
+      <el-button type="primary" @click="submitLabForm" block>确认保存</el-button>
+    </el-dialog>
+
+    <el-dialog v-model="showDailyConfirm" title="确认截图数据" width="90%">
+      <p style="color: #999; font-size: 13px; margin-bottom: 12px;">AI 识别结果如下，请确认后保存：</p>
+      <div class="form-grid">
+        <el-form-item label="日期" class="form-full">
+          <el-date-picker v-model="dailyForm.recorded_date" type="date" format="YYYY-MM-DD" value-format="YYYY-MM-DD" style="width: 100%;" />
+        </el-form-item>
+        <el-form-item label="体重 (kg)"><el-input-number v-model="dailyForm.weight" :step="0.1" controls-position="right" style="width: 100%;" /></el-form-item>
+        <el-form-item label="体脂 (%)"><el-input-number v-model="dailyForm.body_fat" :step="0.1" controls-position="right" style="width: 100%;" /></el-form-item>
+        <el-form-item label="体温"><el-input-number v-model="dailyForm.temperature" :step="0.1" controls-position="right" style="width: 100%;" /></el-form-item>
+        <el-form-item label="睡眠时长 (h)"><el-input-number v-model="dailyForm.sleep_hours" :step="0.5" controls-position="right" style="width: 100%;" /></el-form-item>
+      </div>
+      <el-button type="primary" @click="submitDailyForm" block>确认保存</el-button>
+    </el-dialog>
+
+    <!-- Hormone health assessment form -->
+    <el-dialog v-model="showHormoneForm" title="荷尔蒙健康定量评估" width="90%">
+      <p style="color: #999; font-size: 13px; margin-bottom: 12px;">请填写以下指标进行评估：</p>
+      <div class="form-grid">
+        <el-form-item label="日期" class="form-full">
+          <el-date-picker v-model="hormoneForm.test_date" type="date" format="YYYY-MM-DD" value-format="YYYY-MM-DD" style="width: 100%;" />
+        </el-form-item>
+        <el-form-item label="E2 (pg/mL)"><el-input-number v-model="hormoneForm.e2" :step="0.1" controls-position="right" style="width: 100%;" /></el-form-item>
+        <el-form-item label="FSH (mIU/mL)"><el-input-number v-model="hormoneForm.fsh" :step="0.1" controls-position="right" style="width: 100%;" /></el-form-item>
+        <el-form-item label="LH (mIU/mL)"><el-input-number v-model="hormoneForm.lh" :step="0.1" controls-position="right" style="width: 100%;" /></el-form-item>
+        <el-form-item label="孕酮 (ng/mL)"><el-input-number v-model="hormoneForm.progesterone" :step="0.1" controls-position="right" style="width: 100%;" /></el-form-item>
+        <el-form-item label="睾酮 (ng/dL)"><el-input-number v-model="hormoneForm.testosterone" :step="0.1" controls-position="right" style="width: 100%;" /></el-form-item>
+        <el-form-item label="TSH (mIU/L)"><el-input-number v-model="hormoneForm.tsh" :step="0.01" controls-position="right" style="width: 100%;" /></el-form-item>
+        <el-form-item label="备注" class="form-full"><el-input v-model="hormoneForm.notes" type="textarea" rows="2" /></el-form-item>
+      </div>
+      <el-button type="primary" @click="submitHormoneForm" block>保存评估</el-button>
+    </el-dialog>
+  </div>
+
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <script src="https://unpkg.com/element-plus"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/api.js"></script>
+  <script>
+    const { createApp, ref, reactive, computed, onMounted, nextTick, watch } = Vue;
+
+    createApp({
+      setup() {
+        // Pages: login, profile-setup, home, chat, lab-tests, daily-metrics, scale-tests, profile
+        const currentPage = ref('login');
+        const user = ref(null);
+        const messages = ref([]);
+        const chatInput = ref('');
+        const chatLoading = ref(false);
+        const chatScroll = ref(null);
+        const sessionId = ref('');
+        const pageTitle = computed(() => ({
+          home: '更年不期', chat: 'AI 对话', 'lab-tests': '体检化验',
+          'daily-metrics': '日常数据', 'scale-tests': '量表测试', profile: '个人中心',
+        })[currentPage.value] || '更年不期');
+
+        // Login
+        const loginForm = reactive({ phone: '', code: '' });
+        const sendingCode = ref(false);
+        const codeBtnText = ref('获取验证码');
+        const loggingIn = ref(false);
+        const isValidPhone = computed(() => /^1[3-9]\d{9}$/.test(loginForm.phone));
+
+        // Profile
+        const profileForm = reactive({ nickname: '', avatar: '', birthday: '', height: 160 });
+        const showAvatarPicker = ref(false);
+        const avatarOptions = ['👩', '👩‍🦰', '👩‍🦳'];
+        const avatarDisplay = computed(() => profileForm.avatar || user.value?.avatar || '👩');
+
+        // Lab tests
+        const labTests = ref([]);
+        const showLabForm = ref(false);
+        const showLabUpload = ref(false);
+        const showLabConfirm = ref(false);
+        const labForm = reactive({ test_date: new Date().toISOString().slice(0, 10), e2: null, fsh: null, lh: null, progesterone: null, prolactin: null, calcium: null, vitamin_d: null, notes: '' });
+
+        // Daily metrics
+        const dailyMetrics = ref([]);
+        const showDailyForm = ref(false);
+        const showDailyUpload = ref(false);
+        const showDailyConfirm = ref(false);
+        const dailyForm = reactive({ recorded_date: new Date().toISOString().slice(0, 10), weight: null, body_fat: null, temperature: null, sleep_hours: null, notes: '' });
+
+        // Scale tests
+        const scaleTests = ref([]);
+        const kuppermanTaking = ref(false);
+        const kuppermanQuestions = ref([]);
+        const kuppermanAnswers = reactive({});
+        const showHormoneForm = ref(false);
+        const hormoneForm = reactive({ test_date: new Date().toISOString().slice(0, 10), e2: null, fsh: null, lh: null, progesterone: null, testosterone: null, tsh: null, notes: '' });
+
+        async function sendCode() {
+          if (!isValidPhone.value) return;
+          sendingCode.value = true;
+          try {
+            await api.post('/auth/send-code', { phone: loginForm.phone });
+            let countdown = 60;
+            codeBtnText.value = `${countdown}s`;
+            const timer = setInterval(() => {
+              countdown--;
+              if (countdown <= 0) { clearInterval(timer); sendingCode.value = false; codeBtnText.value = '获取验证码'; }
+              else codeBtnText.value = `${countdown}s`;
+            }, 1000);
+            ElementPlus.ElMessage.success('验证码已发送');
+          } catch (e) { ElementPlus.ElMessage.error(e.message); sendingCode.value = false; }
+        }
+
+        async function handleLogin() {
+          if (!loginForm.phone || !loginForm.code) { ElementPlus.ElMessage.warning('请输入手机号和验证码'); return; }
+          loggingIn.value = true;
+          try {
+            const res = await api.post('/auth/login/phone', { phone: loginForm.phone, code: loginForm.code });
+            storage.set('access_token', res.access_token);
+            storage.set('user', res.user);
+            user.value = res.user;
+            if (!user.value.birthday || !user.value.height) {
+              profileForm.nickname = user.value.nickname;
+              if (user.value.birthday) profileForm.birthday = user.value.birthday;
+              if (user.value.height) profileForm.height = user.value.height;
+              if (user.value.avatar) profileForm.avatar = user.value.avatar;
+              currentPage.value = 'profile-setup';
+            } else {
+              currentPage.value = 'home';
+            }
+            api.trackPage('home');
+            ElementPlus.ElMessage.success('登录成功');
+          } catch (e) { ElementPlus.ElMessage.error(e.message); }
+          finally { loggingIn.value = false; }
+        }
+
+        async function saveProfile() {
+          try {
+            const data = {};
+            if (profileForm.nickname) data.nickname = profileForm.nickname;
+            if (profileForm.birthday) data.birthday = profileForm.birthday;
+            if (profileForm.height) data.height = profileForm.height;
+            if (profileForm.avatar) data.avatar = profileForm.avatar;
+            const res = await api.put('/users/profile', data);
+            user.value = res;
+            storage.set('user', res);
+            currentPage.value = 'home';
+            api.trackPage('home');
+            ElementPlus.ElMessage.success('资料保存成功');
+          } catch (e) { ElementPlus.ElMessage.error(e.message); }
+        }
+
+        async function handleAvatarUpload(e) {
+          const file = e.target.files[0];
+          if (!file) return;
+          try {
+            const res = await api.uploadFile('/users/avatar', file);
+            profileForm.avatar = res.avatar;
+            user.value.avatar = res.avatar;
+            storage.set('user', user.value);
+            ElementPlus.ElMessage.success('头像上传成功');
+          } catch (e) { ElementPlus.ElMessage.error(e.message); }
+        }
+
+        // Navigation
+        function goTo(page) {
+          currentPage.value = page;
+          if (page === 'chat') loadChatHistory();
+          if (page === 'lab-tests') loadLabTests();
+          if (page === 'daily-metrics') loadDailyMetrics();
+          if (page === 'scale-tests') loadScaleTests();
+          if (page === 'profile') { user.value = storage.get('user'); }
+          api.trackPage(page);
+        }
+
+        // Chat
+        async function loadChatHistory() {
+          if (!sessionId.value) sessionId.value = 'sess_' + Date.now();
+          try {
+            const msgs = await api.get(`/chat/history?session_id=${sessionId.value}`);
+            messages.value = msgs;
+            await nextTick();
+            scrollToBottom();
+          } catch (e) { console.error(e); }
+        }
+
+        async function sendMessage() {
+          if (!chatInput.value.trim() || chatLoading.value) return;
+          const content = chatInput.value.trim();
+          chatInput.value = '';
+          messages.value.push({ id: 'tmp', role: 'user', content });
+          chatLoading.value = true;
+          await nextTick(); scrollToBottom();
+
+          if (!sessionId.value) sessionId.value = 'sess_' + Date.now();
+          try {
+            const res = await api.post('/chat/', { content, session_id: sessionId.value });
+            messages.value = res.messages;
+            await nextTick(); scrollToBottom();
+          } catch (e) {
+            ElementPlus.ElMessage.error(e.message);
+            messages.value.pop();
+          } finally { chatLoading.value = false; }
+        }
+
+        function scrollToBottom() {
+          if (chatScroll.value) chatScroll.value.scrollTop = chatScroll.value.scrollHeight;
+        }
+
+        // Lab tests
+        async function loadLabTests() {
+          try { labTests.value = await api.get('/lab-tests/'); } catch (e) { console.error(e); }
+        }
+
+        function resetLabForm() {
+          Object.assign(labForm, { test_date: new Date().toISOString().slice(0, 10), e2: null, fsh: null, lh: null, progesterone: null, prolactin: null, calcium: null, vitamin_d: null, notes: '' });
+        }
+
+        async function submitLabForm() {
+          try {
+            await api.post('/lab-tests/', { ...labForm, source: 'manual' });
+            showLabForm.value = false; showLabConfirm.value = false;
+            resetLabForm();
+            await loadLabTests();
+            ElementPlus.ElMessage.success('记录已保存');
+          } catch (e) { ElementPlus.ElMessage.error(e.message); }
+        }
+
+        async function handleLabUpload(e) {
+          const file = e.target.files[0];
+          if (!file) return;
+          try {
+            const res = await api.uploadFile('/lab-tests/vision-parse', file);
+            if (res.success && res.data) {
+              resetLabForm();
+              Object.assign(labForm, res.data);
+              if (res.data.test_date) labForm.test_date = res.data.test_date;
+              showLabConfirm.value = true;
+            }
+          } catch (e) { ElementPlus.ElMessage.error(e.message); }
+        }
+
+        async function deleteLabTest(id) {
+          try {
+            await api.del(`/lab-tests/${id}`);
+            await loadLabTests();
+            ElementPlus.ElMessage.success('已删除');
+          } catch (e) { ElementPlus.ElMessage.error(e.message); }
+        }
+
+        // Daily metrics
+        async function loadDailyMetrics() {
+          try { dailyMetrics.value = await api.get('/daily-metrics/'); } catch (e) { console.error(e); }
+        }
+
+        function resetDailyForm() {
+          Object.assign(dailyForm, { recorded_date: new Date().toISOString().slice(0, 10), weight: null, body_fat: null, temperature: null, sleep_hours: null, notes: '' });
+        }
+
+        async function submitDailyForm() {
+          try {
+            await api.post('/daily-metrics/', { ...dailyForm, source: showDailyConfirm.value ? 'screenshot' : 'manual' });
+            showDailyForm.value = false; showDailyConfirm.value = false;
+            resetDailyForm();
+            await loadDailyMetrics();
+            ElementPlus.ElMessage.success('记录已保存');
+          } catch (e) { ElementPlus.ElMessage.error(e.message); }
+        }
+
+        async function deleteDailyMetric(id) {
+          try {
+            await api.del(`/daily-metrics/${id}`);
+            await loadDailyMetrics();
+            ElementPlus.ElMessage.success('已删除');
+          } catch (e) { ElementPlus.ElMessage.error(e.message); }
+        }
+
+        // Scale tests
+        async function loadScaleTests() {
+          try { scaleTests.value = await api.get('/scale-tests/'); } catch (e) { console.error(e); }
+        }
+
+        async function startKupperman() {
+          try {
+            kuppermanQuestions.value = await api.get('/scale-tests/kupperman/questions');
+            kuppermanTaking.value = true;
+            Object.keys(kuppermanAnswers).forEach(k => delete kuppermanAnswers[k]);
+          } catch (e) { ElementPlus.ElMessage.error(e.message); }
+        }
+
+        async function submitKupperman() {
+          const scores = { ...kuppermanAnswers };
+          const total = Object.values(scores).reduce((a, b) => a + (b || 0), 0);
+          let level = '无';
+          if (total >= 30) level = '重度';
+          else if (total >= 20) level = '中度';
+          else if (total >= 15) level = '轻度';
+
+          try {
+            await api.post('/scale-tests/', {
+              test_date: new Date().toISOString().slice(0, 10),
+              scale_type: 'kupperman', scores, total_score: total, severity_level: level,
+            });
+            kuppermanTaking.value = false;
+            await loadScaleTests();
+            ElementPlus.ElMessage.success(`评估完成！总分: ${total} (${level})`);
+          } catch (e) { ElementPlus.ElMessage.error(e.message); }
+        }
+
+        async function submitHormoneForm() {
+          const scores = { e2: hormoneForm.e2, fsh: hormoneForm.fsh, lh: hormoneForm.lh, progesterone: hormoneForm.progesterone, testosterone: hormoneForm.testosterone, tsh: hormoneForm.tsh };
+          try {
+            await api.post('/scale-tests/', {
+              test_date: hormoneForm.test_date, scale_type: 'hormone_health',
+              scores, total_score: 0, notes: hormoneForm.notes,
+            });
+            showHormoneForm.value = false;
+            Object.assign(hormoneForm, { test_date: new Date().toISOString().slice(0, 10), e2: null, fsh: null, lh: null, progesterone: null, testosterone: null, tsh: null, notes: '' });
+            await loadScaleTests();
+            ElementPlus.ElMessage.success('评估已保存');
+          } catch (e) { ElementPlus.ElMessage.error(e.message); }
+        }
+
+        async function deleteScaleTest(id) {
+          try { await api.del(`/scale-tests/${id}`); await loadScaleTests(); ElementPlus.ElMessage.success('已删除'); }
+          catch (e) { ElementPlus.ElMessage.error(e.message); }
+        }
+
+        function handleLogout() {
+          storage.clear();
+          currentPage.value = 'login';
+          loginForm.phone = ''; loginForm.code = '';
+          ElementPlus.ElMessage.success('已退出登录');
+        }
+
+        // File upload handlers for dialogs
+        const handleLabUploadClick = () => {
+          const input = document.createElement('input');
+          input.type = 'file'; input.accept = 'image/*';
+          input.onchange = async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            try {
+              const res = await api.uploadFile('/lab-tests/vision-parse', file);
+              if (res.success && res.data) {
+                resetLabForm();
+                Object.assign(labForm, res.data);
+                if (res.data.test_date) labForm.test_date = res.data.test_date;
+                showLabConfirm.value = true;
+              }
+            } catch (e) { ElementPlus.ElMessage.error(e.message); }
+          };
+          input.click();
+        };
+
+        const handleDailyUploadClick = () => {
+          const input = document.createElement('input');
+          input.type = 'file'; input.accept = 'image/*';
+          input.onchange = async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            try {
+              const res = await api.uploadFile('/daily-metrics/vision-parse', file);
+              if (res.success && res.data) {
+                resetDailyForm();
+                Object.assign(dailyForm, res.data);
+                if (res.data.recorded_date) dailyForm.recorded_date = res.data.recorded_date;
+                showDailyConfirm.value = true;
+              }
+            } catch (e) { ElementPlus.ElMessage.error(e.message); }
+          };
+          input.click();
+        };
+
+        // Watch for dialog open to attach click handlers
+        watch(showLabUpload, (val) => { if (val) { setTimeout(handleLabUploadClick, 100); showLabUpload.value = false; } });
+        watch(showDailyUpload, (val) => { if (val) { setTimeout(handleDailyUploadClick, 100); showDailyUpload.value = false; } });
+
+        // Init
+        onMounted(async () => {
+          if (storage.isLoggedIn()) {
+            user.value = storage.get('user');
+            try {
+              const profile = await api.get('/users/profile');
+              user.value = profile;
+              storage.set('user', profile);
+              currentPage.value = 'home';
+            } catch {
+              storage.clear(); currentPage.value = 'login';
+            }
+          }
+        });
+
+        return {
+          currentPage, user, messages, chatInput, chatLoading, chatScroll, pageTitle,
+          loginForm, sendingCode, codeBtnText, loggingIn, isValidPhone, sendCode, handleLogin,
+          profileForm, showAvatarPicker, avatarOptions, avatarDisplay, saveProfile, handleAvatarUpload,
+          labTests, showLabForm, showLabUpload, showLabConfirm, labForm, submitLabForm, deleteLabTest,
+          dailyMetrics, showDailyForm, showDailyUpload, showDailyConfirm, dailyForm, submitDailyForm, deleteDailyMetric,
+          scaleTests, kuppermanTaking, kuppermanQuestions, kuppermanAnswers, startKupperman, submitKupperman,
+          showHormoneForm, hormoneForm, submitHormoneForm, deleteScaleTest,
+          goTo, sendMessage, handleLogout,
+        };
+      }
+    }).use(ElementPlus).mount('#app');
+  </script>
+</body>
+</html>
