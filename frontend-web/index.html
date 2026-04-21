@@ -7,44 +7,54 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌸</text></svg>">
   <link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css">
   <style>
+    :root {
+      --primary: #5B8A72;
+      --primary-light: #7FB096;
+      --primary-dark: #4A7360;
+      --bg: #FAFAF7;
+      --bg-warm: #F5F1EB;
+      --accent: #E8985E;
+      --text-dark: #3D3D3D;
+      --text-mid: #6B6B6B;
+      --text-light: #999;
+      --card-bg: #FFFFFF;
+      --border: #E8E4DE;
+    }
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background: #FFF5F5; min-height: 100vh; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background: var(--bg); min-height: 100vh; color: var(--text-dark); }
     #app { max-width: 480px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; }
     .page { flex: 1; padding: 16px; }
 
     /* Login Page */
-    .login-page { display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; padding: 32px; background: linear-gradient(135deg, #FFF5F5 0%, #FFE4E1 50%, #F5EEF8 100%); }
-    .login-logo { font-size: 64px; margin-bottom: 12px; }
-    .login-title { font-size: 28px; font-weight: bold; color: #8B4585; margin-bottom: 4px; }
-    .login-subtitle { font-size: 14px; color: #B8860B; margin-bottom: 40px; }
+    .login-page { display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; padding: 32px; background: var(--bg); }
+    .login-logo { font-size: 56px; margin-bottom: 12px; }
+    .login-title { font-size: 26px; font-weight: bold; color: var(--primary-dark); margin-bottom: 4px; letter-spacing: 2px; }
+    .login-subtitle { font-size: 13px; color: var(--text-mid); margin-bottom: 36px; }
     .login-form { width: 100%; max-width: 320px; }
     .login-form .el-input { margin-bottom: 16px; }
+    .code-row { display: flex; gap: 10px; margin-bottom: 20px; }
+    .code-row .el-input { margin-bottom: 0; flex: 1; }
+    .code-row .el-button { white-space: nowrap; min-width: 110px; height: 40px; }
 
     /* Main Layout */
-    .main-header { background: linear-gradient(135deg, #D4A0C7, #E8B4B8); color: white; padding: 16px; text-align: center; border-radius: 0 0 20px 20px; }
+    .main-header { background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: white; padding: 16px; text-align: center; border-radius: 0 0 20px 20px; }
     .main-header h2 { font-size: 18px; font-weight: 600; }
-    .tab-bar { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #f0f0f0; display: flex; z-index: 100; max-width: 480px; margin: 0 auto; }
-    .tab-item { flex: 1; text-align: center; padding: 8px 0; font-size: 10px; color: #999; cursor: pointer; transition: color 0.2s; }
+    .tab-bar { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid var(--border); display: flex; z-index: 100; max-width: 480px; margin: 0 auto; }
+    .tab-item { flex: 1; text-align: center; padding: 8px 0; font-size: 10px; color: var(--text-light); cursor: pointer; transition: color 0.2s; }
     .tab-item .tab-icon { font-size: 22px; display: block; margin-bottom: 2px; }
-    .tab-item.active { color: #D4A0C7; }
+    .tab-item.active { color: var(--primary); }
     .tab-content { flex: 1; padding: 16px; padding-bottom: 70px; }
 
     /* Home */
-    .home-greeting { background: linear-gradient(135deg, #F5EEF8, #FDE8E8); border-radius: 16px; padding: 20px; margin-bottom: 16px; }
-    .home-greeting h3 { color: #8B4585; margin-bottom: 4px; }
-    .home-greeting p { color: #999; font-size: 13px; }
+    .home-greeting { background: linear-gradient(135deg, #E8F0EB, #F0E8DF); border-radius: 16px; padding: 20px; margin-bottom: 16px; }
+    .home-greeting h3 { color: var(--primary-dark); margin-bottom: 4px; }
+    .home-greeting p { color: var(--text-mid); font-size: 13px; }
     .nav-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
-    .nav-card { background: white; border-radius: 12px; padding: 16px 12px; text-align: center; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    .nav-card { background: var(--card-bg); border-radius: 12px; padding: 16px 12px; text-align: center; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid var(--border); }
     .nav-card:active { transform: scale(0.96); }
     .nav-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
     .nav-card .nav-icon { font-size: 32px; margin-bottom: 8px; }
-    .nav-card .nav-label { font-size: 13px; color: #333; font-weight: 500; }
-    .recent-section h4 { font-size: 15px; color: #333; margin-bottom: 12px; }
-    .recent-item { background: white; border-radius: 10px; padding: 12px; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; }
-    .recent-item .ri-icon { width: 40px; height: 40px; border-radius: 10px; background: #F5EEF8; display: flex; align-items: center; justify-content: center; font-size: 18px; }
-    .recent-item .ri-info { flex: 1; }
-    .recent-item .ri-title { font-size: 14px; color: #333; font-weight: 500; }
-    .recent-item .ri-date { font-size: 12px; color: #999; }
+    .nav-card .nav-label { font-size: 13px; color: var(--text-dark); font-weight: 500; }
 
     /* Chat */
     .chat-container { display: flex; flex-direction: column; height: calc(100vh - 130px); }
@@ -53,57 +63,55 @@
     .msg-row { display: flex; margin-bottom: 16px; align-items: flex-start; }
     .msg-row.user { flex-direction: row-reverse; }
     .msg-avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
-    .msg-row.assistant .msg-avatar { background: #F5EEF8; }
-    .msg-row.user .msg-avatar { background: #E8B4B8; }
+    .msg-row.assistant .msg-avatar { background: #E8F0EB; }
+    .msg-row.user .msg-avatar { background: #F0E8DF; }
     .msg-bubble { max-width: 75%; padding: 10px 14px; border-radius: 16px; font-size: 14px; line-height: 1.6; word-break: break-word; white-space: pre-wrap; }
-    .msg-row.assistant .msg-bubble { background: white; margin-left: 8px; border-bottom-left-radius: 4px; }
-    .msg-row.user .msg-bubble { background: #D4A0C7; color: white; margin-right: 8px; border-bottom-right-radius: 4px; }
+    .msg-row.assistant .msg-bubble { background: white; margin-left: 8px; border-bottom-left-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+    .msg-row.user .msg-bubble { background: var(--primary); color: white; margin-right: 8px; border-bottom-right-radius: 4px; }
 
     /* Record pages */
     .record-header { display: flex; gap: 10px; margin-bottom: 16px; }
     .record-header .el-button { flex: 1; }
     .record-list { display: flex; flex-direction: column; gap: 8px; }
-    .record-card { background: white; border-radius: 12px; padding: 14px; position: relative; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+    .record-card { background: var(--card-bg); border-radius: 12px; padding: 14px; position: relative; box-shadow: 0 1px 4px rgba(0,0,0,0.05); border: 1px solid var(--border); }
     .record-card .rc-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-    .record-card .rc-date { font-size: 12px; color: #999; }
+    .record-card .rc-date { font-size: 12px; color: var(--text-light); }
     .record-card .rc-data { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; }
-    .record-card .rc-item { background: #F8F5FF; border-radius: 8px; padding: 8px; text-align: center; }
-    .record-card .rc-label { font-size: 11px; color: #999; }
-    .record-card .rc-value { font-size: 16px; font-weight: 600; color: #8B4585; }
+    .record-card .rc-item { background: var(--bg-warm); border-radius: 8px; padding: 8px; text-align: center; }
+    .record-card .rc-label { font-size: 11px; color: var(--text-light); }
+    .record-card .rc-value { font-size: 16px; font-weight: 600; color: var(--primary-dark); }
     .record-card .rc-delete { position: absolute; top: 10px; right: 10px; cursor: pointer; color: #ccc; font-size: 18px; }
     .record-card .rc-delete:hover { color: #E74C3C; }
-    .record-card .rc-notes { font-size: 12px; color: #666; margin-top: 8px; padding-top: 8px; border-top: 1px solid #f0f0f0; }
+    .record-card .rc-notes { font-size: 12px; color: var(--text-mid); margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
 
-    /* Manual form dialog */
+    /* Forms */
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .form-full { grid-column: 1 / -1; }
 
     /* Profile */
     .avatar-section { text-align: center; padding: 20px 0; }
-    .avatar-big { width: 80px; height: 80px; border-radius: 50%; background: #F5EEF8; display: inline-flex; align-items: center; justify-content: center; font-size: 36px; cursor: pointer; }
+    .avatar-big { width: 80px; height: 80px; border-radius: 50%; background: var(--bg-warm); display: inline-flex; align-items: center; justify-content: center; font-size: 36px; cursor: pointer; }
     .avatar-options { display: flex; gap: 12px; justify-content: center; margin-top: 12px; }
-    .avatar-opt { width: 48px; height: 48px; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; border: 2px solid transparent; }
-    .avatar-opt.selected { border-color: #D4A0C7; }
+    .avatar-opt { width: 48px; height: 48px; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; border: 2px solid transparent; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    .avatar-opt.selected { border-color: var(--primary); }
 
     /* Scale test */
-    .scale-question { background: white; border-radius: 12px; padding: 14px; margin-bottom: 12px; }
-    .scale-question .sq-label { font-size: 14px; font-weight: 500; color: #333; margin-bottom: 10px; }
+    .scale-question { background: var(--card-bg); border-radius: 12px; padding: 14px; margin-bottom: 12px; border: 1px solid var(--border); }
+    .scale-question .sq-label { font-size: 14px; font-weight: 500; color: var(--text-dark); margin-bottom: 10px; }
     .scale-question .sq-options { display: flex; flex-direction: column; gap: 8px; }
-    .scale-question .sq-opt { padding: 10px 14px; border: 1px solid #e8e8e8; border-radius: 8px; cursor: pointer; transition: all 0.2s; font-size: 13px; }
-    .scale-question .sq-opt:hover { border-color: #D4A0C7; background: #FFF5F8; }
-    .scale-question .sq-opt.selected { border-color: #D4A0C7; background: #F5EEF8; color: #8B4585; font-weight: 500; }
-    .scale-result { text-align: center; padding: 20px; background: linear-gradient(135deg, #F5EEF8, #FDE8E8); border-radius: 16px; margin-bottom: 16px; }
-    .scale-result .sr-score { font-size: 48px; font-weight: bold; color: #8B4585; }
-    .scale-result .sr-level { font-size: 16px; color: #666; margin-top: 4px; }
+    .scale-question .sq-opt { padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; transition: all 0.2s; font-size: 13px; }
+    .scale-question .sq-opt:hover { border-color: var(--primary); background: #E8F0EB; }
+    .scale-question .sq-opt.selected { border-color: var(--primary); background: #E8F0EB; color: var(--primary-dark); font-weight: 500; }
+    .scale-result { text-align: center; padding: 20px; background: linear-gradient(135deg, #E8F0EB, #F0E8DF); border-radius: 16px; margin-bottom: 16px; }
+    .scale-result .sr-score { font-size: 48px; font-weight: bold; color: var(--primary-dark); }
+    .scale-result .sr-level { font-size: 16px; color: var(--text-mid); margin-top: 4px; }
 
-    .empty-state { text-align: center; padding: 40px 20px; color: #ccc; }
+    .empty-state { text-align: center; padding: 40px 20px; color: var(--text-light); }
     .empty-state .empty-icon { font-size: 48px; margin-bottom: 8px; }
 
-    /* Loading overlay */
-    .loading-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; z-index: 999; }
-
-    .el-button--primary { background: #D4A0C7 !important; border-color: #D4A0C7 !important; }
-    .el-button--primary:hover { background: #C490B7 !important; border-color: #C490B7 !important; }
+    /* Element overrides */
+    .el-button--primary { background: var(--primary) !important; border-color: var(--primary) !important; }
+    .el-button--primary:hover { background: var(--primary-dark) !important; border-color: var(--primary-dark) !important; }
   </style>
 </head>
 <body>
@@ -114,16 +122,17 @@
         <div class="login-title">更年不期</div>
         <div class="login-subtitle">温暖陪伴，安心度过每一程</div>
         <div class="login-form">
-          <el-input v-model="loginForm.phone" placeholder="请输入手机号" maxlength="11" clearable prefix-icon="Phone" />
-          <el-input v-model="loginForm.code" placeholder="请输入验证码" maxlength="4" clearable style="width: 65%; display: inline-block; margin-right: 8px;">
-          </el-input>
-          <el-button @click="sendCode" :disabled="sendingCode || !isValidPhone" :loading="sendingCode" style="width: 33%;">
-            {{ codeBtnText }}
-          </el-button>
+          <el-input v-model="loginForm.phone" placeholder="请输入手机号" maxlength="11" clearable />
+          <div class="code-row">
+            <el-input v-model="loginForm.code" placeholder="验证码" maxlength="4" clearable />
+            <el-button @click="sendCode" :disabled="sendingCode || !isValidPhone" :loading="sendingCode">
+              {{ codeBtnText }}
+            </el-button>
+          </div>
           <el-button type="primary" @click="handleLogin" :loading="loggingIn" size="large" block>
             登录 / 注册
           </el-button>
-          <div style="text-align: center; margin-top: 16px; font-size: 12px; color: #999;">
+          <div style="text-align: center; margin-top: 16px; font-size: 12px; color: var(--text-light);">
             测试账号：13712345678，验证码 1234
           </div>
         </div>
@@ -131,7 +140,7 @@
     </template>
 
     <template v-else-if="currentPage === 'profile-setup'">
-      <div class="page" style="background: linear-gradient(135deg, #FFF5F5, #F5EEF8); min-height: 100vh;">
+      <div class="page" style="background: var(--bg); min-height: 100vh;">
         <h3 style="text-align: center; color: #8B4585; margin-bottom: 20px;">完善个人资料</h3>
 
         <div class="avatar-section">
