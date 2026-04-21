@@ -65,7 +65,7 @@
     .main-header .back-btn { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); background: none; border: none; color: white; font-size: 20px; cursor: pointer; }
 
     /* Tab Content */
-    .tab-content { flex: 1; padding: 0; padding-bottom: 56px; overflow: hidden; position: relative; }
+    .tab-content { flex: 1; padding: 0; padding-bottom: 56px; overflow-y: auto; position: relative; }
 
     /* Chat */
     .chat-container { display: flex; flex-direction: column; height: 100%; }
@@ -185,7 +185,7 @@
     .el-button--primary:hover { background: var(--primary-dark) !important; border-color: var(--primary-dark) !important; }
 
     /* Bottom tab bar */
-    .tab-bar { display: flex; border-top: 1px solid var(--border); background: white; position: sticky; bottom: 0; }
+    .tab-bar { display: flex; border-top: 1px solid var(--border); background: white; position: absolute; bottom: 0; left: 0; right: 0; z-index: 100; padding-bottom: env(safe-area-inset-bottom, 0); }
     .tab-item { flex: 1; text-align: center; padding: 8px 0 10px; font-size: 11px; color: var(--text-light); cursor: pointer; }
     .tab-item.active { color: var(--primary); }
     .tab-icon { font-size: 22px; display: block; line-height: 1.3; }
