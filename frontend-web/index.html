@@ -443,10 +443,10 @@
                 <p>题目加载中...</p>
               </div>
               <template v-else>
-                <div v-for="q in kuppermanQuestions" :key="q.id" class="scale-question" :class="{ unanswered: kuppermanAnswers[q.id] == null && !kuppermanCompleted }">
+                <div v-for="q in kuppermanQuestions" :key="q.id" class="scale-question" :class="{ unanswered: kuppermanShowValidation && !(q.id in kuppermanAnswers) }">
                   <div class="sq-label">{{ q.label }}</div>
                   <div class="sq-options">
-                    <div v-for="opt in q.options" :key="opt.score" class="sq-opt" :class="{ selected: kuppermanAnswers[q.id] === opt.score }" @click="kuppermanAnswers[q.id] = opt.score">
+                    <div v-for="opt in q.options" :key="opt.score" class="sq-opt" :class="{ selected: kuppermanAnswers[q.id] === opt.score }" @click="kuppermanAnswers[q.id] = opt.score; kuppermanShowValidation = false">
                       {{ opt.label }}
                     </div>
                   </div>
@@ -466,10 +466,10 @@
               <template v-else>
                 <div v-for="dim in hormoneQuestions.dimensions" :key="dim.name" style="margin-bottom: 16px;">
                   <div style="font-size: 14px; font-weight: 600; color: var(--primary-dark); margin-bottom: 10px; padding-left: 4px; border-left: 3px solid var(--primary);">{{ dim.name }}</div>
-                  <div v-for="q in dim.questions" :key="q.id" class="scale-question" :class="{ unanswered: hormoneAnswers[q.id] == null && !hormoneCompleted }">
+                  <div v-for="q in dim.questions" :key="q.id" class="scale-question" :class="{ unanswered: hormoneShowValidation && !(q.id in hormoneAnswers) }">
                     <div class="sq-label">{{ q.label }}</div>
                     <div class="sq-options">
-                      <div v-for="opt in q.options" :key="opt.score" class="sq-opt" :class="{ selected: hormoneAnswers[q.id] === opt.score }" @click="hormoneAnswers[q.id] = opt.score">
+                      <div v-for="opt in q.options" :key="opt.score" class="sq-opt" :class="{ selected: hormoneAnswers[q.id] === opt.score }" @click="hormoneAnswers[q.id] = opt.score; hormoneShowValidation = false">
                         {{ opt.label }}
                       </div>
                     </div>
@@ -721,11 +721,13 @@
         const kuppermanTaking = ref(false);
         const kuppermanQuestions = ref([]);
         const kuppermanAnswers = reactive({});
+        const kuppermanShowValidation = ref(false);
         const showHormoneForm = ref(false);
         const hormoneTaking = ref(false);
         const hormoneCurrentDim = ref(0);
         const hormoneQuestions = reactive({ dimensions: [] });
         const hormoneAnswers = reactive({});
+        const hormoneShowValidation = ref(false);
         const showHormoneResult = ref(false);
         const hormoneResult = reactive({ total_score: 0, level: '', advice: '', color: '', dimensions: [] });
 
@@ -907,6 +909,7 @@
           scaleActiveTest.value = 'kupperman';
           kuppermanTaking.value = true;
           kuppermanQuestions.value = [];
+          kuppermanShowValidation.value = false;
           Object.keys(kuppermanAnswers).forEach(k => delete kuppermanAnswers[k]);
           try {
             const data = await api.get('/scale-tests/kupperman/questions');
@@ -919,7 +922,16 @@
         });
 
         async function submitKupperman() {
-          if (!kuppermanCompleted.value) { ElementPlus.ElMessage.warning('请完成所有题目'); return; }
+          if (!kuppermanCompleted.value) {
+            kuppermanShowValidation.value = true;
+            // Scroll to first unanswered question
+            await nextTick();
+            const firstUnanswered = document.querySelector('.scale-question.unanswered');
+            if (firstUnanswered) firstUnanswered.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            ElementPlus.ElMessage.warning('请完成所有题目');
+            return;
+          }
+          kuppermanShowValidation.value = false;
           const scores = { ...kuppermanAnswers };
           const total = Object.values(scores).reduce((a, b) => a + (b || 0), 0);
           let level = '无';
@@ -944,6 +956,7 @@
           scaleActiveTest.value = 'hormone';
           hormoneTaking.value = true;
           hormoneCurrentDim.value = 0;
+          hormoneShowValidation.value = false;
           Object.keys(hormoneAnswers).forEach(k => delete hormoneAnswers[k]);
           // Reset dimensions to empty so loading state shows
           hormoneQuestions.dimensions = [];
@@ -967,7 +980,15 @@
         });
 
         async function submitHormone() {
-          if (!hormoneCompleted.value) { ElementPlus.ElMessage.warning('请完成所有题目'); return; }
+          if (!hormoneCompleted.value) {
+            hormoneShowValidation.value = true;
+            await nextTick();
+            const firstUnanswered = document.querySelector('.scale-question.unanswered');
+            if (firstUnanswered) firstUnanswered.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            ElementPlus.ElMessage.warning('请完成所有题目');
+            return;
+          }
+          hormoneShowValidation.value = false;
           const scores = { ...hormoneAnswers };
           const total = Object.values(scores).reduce((a, b) => a + (b || 0), 0);
 
@@ -1111,8 +1132,8 @@
           profileForm, showAvatarPicker, avatarOptions, avatarDisplay, saveProfile, handleAvatarUpload,
           labTests, showLabForm, showLabUpload, showLabConfirm, labForm, submitLabForm, deleteLabTest,
           dailyMetrics, showDailyForm, showDailyUpload, showDailyConfirm, dailyForm, submitDailyForm, deleteDailyMetric,
-          scaleTests, kuppermanTaking, scaleActiveTest, kuppermanQuestions, kuppermanAnswers, kuppermanCompleted, startKupperman, submitKupperman,
-          showHormoneForm, hormoneTaking, hormoneCurrentDim, hormoneQuestions, hormoneAnswers, hormoneCompleted,
+          scaleTests, kuppermanTaking, scaleActiveTest, kuppermanQuestions, kuppermanAnswers, kuppermanCompleted, kuppermanShowValidation, startKupperman, submitKupperman,
+          showHormoneForm, hormoneTaking, hormoneCurrentDim, hormoneQuestions, hormoneAnswers, hormoneCompleted, hormoneShowValidation,
           startHormone, hormoneNextDim, hormonePrevDim, submitHormone,
           showHormoneResult, hormoneResult, deleteScaleTest, touchDelete, releaseDelete,
           switchTab, loadChatHistory, sendMessage, handleLogout, goToProfileSetup,
