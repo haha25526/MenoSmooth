@@ -129,7 +129,9 @@
         <div class="login-form">
           <el-input v-model="loginForm.phone" placeholder="请输入手机号" maxlength="11" clearable />
           <div class="code-row">
-            <el-input v-model="loginForm.code" placeholder="验证码" maxlength="4" clearable />
+            <input v-model="loginForm.code" placeholder="验证码" maxlength="4"
+                   style="flex:1; padding: 0 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; outline: none; min-height: 40px;"
+                   @focus="this.style.borderColor='var(--primary)'" @blur="this.style.borderColor='var(--border)'" />
             <el-button @click="sendCode" :disabled="sendingCode || !isValidPhone" :loading="sendingCode">
               {{ codeBtnText }}
             </el-button>
