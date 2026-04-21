@@ -171,7 +171,8 @@
     }
 
     /* Scale test */
-    .scale-question { background: var(--card-bg); border-radius: 12px; padding: 14px; margin-bottom: 12px; border: 1px solid var(--border); }
+    .scale-question { background: var(--card-bg); border-radius: 12px; padding: 14px; margin-bottom: 12px; border: 1px solid var(--border); transition: border-color 0.3s, box-shadow 0.3s; }
+    .scale-question.unanswered { border-color: #E74C3C; box-shadow: 0 0 0 2px rgba(231,76,60,0.2); }
     .scale-question .sq-label { font-size: 14px; font-weight: 500; color: var(--text-dark); margin-bottom: 10px; }
     .scale-question .sq-options { display: flex; flex-direction: column; gap: 8px; }
     .scale-question .sq-opt { padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; transition: all 0.2s; font-size: 13px; }
@@ -197,10 +198,13 @@
     .el-button--primary:hover { background: var(--primary-dark) !important; border-color: var(--primary-dark) !important; }
 
     /* Bottom tab bar */
-    .tab-bar { display: flex; border-top: 1px solid var(--border); background: white; position: absolute; bottom: 0; left: 0; right: 0; z-index: 100; padding-bottom: env(safe-area-inset-bottom, 0); }
+    .tab-bar { display: flex; border-top: 1px solid var(--border); background: white; position: absolute; bottom: 0; left: 0; right: 0; z-index: 1000; padding-bottom: env(safe-area-inset-bottom, 0); }
     .tab-item { flex: 1; text-align: center; padding: 8px 0 10px; font-size: 11px; color: var(--text-light); cursor: pointer; }
     .tab-item.active { color: var(--primary); }
     .tab-icon { font-size: 22px; display: block; line-height: 1.3; }
+
+    /* Scale submit button centered */
+    .scale-submit-btn { margin: 0 auto; width: auto; padding: 0 40px; }
   </style>
 </head>
 <body>
@@ -439,7 +443,7 @@
                 <p>题目加载中...</p>
               </div>
               <template v-else>
-                <div v-for="q in kuppermanQuestions" :key="q.id" class="scale-question">
+                <div v-for="q in kuppermanQuestions" :key="q.id" class="scale-question" :class="{ unanswered: kuppermanAnswers[q.id] == null && !kuppermanCompleted }">
                   <div class="sq-label">{{ q.label }}</div>
                   <div class="sq-options">
                     <div v-for="opt in q.options" :key="opt.score" class="sq-opt" :class="{ selected: kuppermanAnswers[q.id] === opt.score }" @click="kuppermanAnswers[q.id] = opt.score">
@@ -447,7 +451,7 @@
                     </div>
                   </div>
                 </div>
-                <el-button type="primary" @click="submitKupperman" block size="large" :disabled="!kuppermanCompleted">提交评估</el-button>
+                <el-button type="primary" @click="submitKupperman" size="large" class="scale-submit-btn" :disabled="!kuppermanCompleted">提交评估</el-button>
               </template>
             </div>
           </template>
@@ -462,7 +466,7 @@
               <template v-else>
                 <div v-for="dim in hormoneQuestions.dimensions" :key="dim.name" style="margin-bottom: 16px;">
                   <div style="font-size: 14px; font-weight: 600; color: var(--primary-dark); margin-bottom: 10px; padding-left: 4px; border-left: 3px solid var(--primary);">{{ dim.name }}</div>
-                  <div v-for="q in dim.questions" :key="q.id" class="scale-question">
+                  <div v-for="q in dim.questions" :key="q.id" class="scale-question" :class="{ unanswered: hormoneAnswers[q.id] == null && !hormoneCompleted }">
                     <div class="sq-label">{{ q.label }}</div>
                     <div class="sq-options">
                       <div v-for="opt in q.options" :key="opt.score" class="sq-opt" :class="{ selected: hormoneAnswers[q.id] === opt.score }" @click="hormoneAnswers[q.id] = opt.score">
@@ -471,7 +475,7 @@
                     </div>
                   </div>
                 </div>
-                <el-button type="primary" @click="submitHormone" block size="large" :disabled="!hormoneCompleted">提交评估</el-button>
+                <el-button type="primary" @click="submitHormone" size="large" class="scale-submit-btn" :disabled="!hormoneCompleted">提交评估</el-button>
               </template>
             </div>
           </template>
@@ -899,12 +903,14 @@
         }
 
         async function startKupperman() {
+          // Immediately switch view to show loading state
+          scaleActiveTest.value = 'kupperman';
+          kuppermanTaking.value = true;
+          kuppermanQuestions.value = [];
+          Object.keys(kuppermanAnswers).forEach(k => delete kuppermanAnswers[k]);
           try {
             const data = await api.get('/scale-tests/kupperman/questions');
             kuppermanQuestions.value = data.questions;
-            kuppermanTaking.value = true;
-            scaleActiveTest.value = 'kupperman';
-            Object.keys(kuppermanAnswers).forEach(k => delete kuppermanAnswers[k]);
           } catch (e) { ElementPlus.ElMessage.error(e.message); }
         }
 
@@ -934,13 +940,16 @@
         }
 
         async function startHormone() {
+          // Immediately switch view to show loading state
+          scaleActiveTest.value = 'hormone';
+          hormoneTaking.value = true;
+          hormoneCurrentDim.value = 0;
+          Object.keys(hormoneAnswers).forEach(k => delete hormoneAnswers[k]);
+          // Reset dimensions to empty so loading state shows
+          hormoneQuestions.dimensions = [];
           try {
             const data = await api.get('/scale-tests/hormone/questions');
             hormoneQuestions.dimensions = data.dimensions;
-            hormoneTaking.value = true;
-            scaleActiveTest.value = 'hormone';
-            hormoneCurrentDim.value = 0;
-            Object.keys(hormoneAnswers).forEach(k => delete hormoneAnswers[k]);
           } catch (e) { ElementPlus.ElMessage.error(e.message); }
         }
 
@@ -1001,7 +1010,13 @@
         // Long-press delete for history items
         function touchDelete(id) {
           deleteTimeout.value = setTimeout(() => {
-            deleteScaleTest(id);
+            ElementPlus.ElMessageBox.confirm('确定要删除这条记录吗？', '删除确认', {
+              confirmButtonText: '删除',
+              cancelButtonText: '取消',
+              type: 'warning',
+            }).then(() => {
+              deleteScaleTest(id);
+            }).catch(() => {});
           }, 600);
         }
         function releaseDelete() {
