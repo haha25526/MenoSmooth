@@ -60,8 +60,6 @@
     .msg-row.user .msg-bubble { background: var(--primary); color: white; margin-right: 8px; border-bottom-right-radius: 4px; }
 
     /* Record pages */
-    .record-header { display: flex; gap: 10px; margin-bottom: 16px; }
-    .record-header .el-button { flex: 1; }
     .record-list { display: flex; flex-direction: column; gap: 8px; }
     .record-card { background: var(--card-bg); border-radius: 12px; padding: 14px; position: relative; box-shadow: 0 1px 4px rgba(0,0,0,0.05); border: 1px solid var(--border); }
     .record-card .rc-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
@@ -73,6 +71,39 @@
     .record-card .rc-delete { position: absolute; top: 10px; right: 10px; cursor: pointer; color: #ccc; font-size: 18px; }
     .record-card .rc-delete:hover { color: #E74C3C; }
     .record-card .rc-notes { font-size: 12px; color: var(--text-mid); margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
+
+    /* Sub-page header */
+    .sub-header { display: flex; align-items: center; gap: 12px; padding: 18px 16px; background: var(--primary); }
+    .sub-header .sub-back { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); border-radius: 12px; width: 40px; height: 40px; font-size: 24px; cursor: pointer; color: white; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .sub-header .sub-back:active { background: rgba(255,255,255,0.4); }
+    .sub-header .sub-title { font-size: 16px; font-weight: 700; color: white; }
+    .sub-header .sub-sub { font-size: 12px; color: rgba(255,255,255,0.75); margin-top: 1px; }
+    .sub-body { padding: 16px; }
+
+    /* Hero banner (records tab) */
+    .hero-banner { height: 180px; background: linear-gradient(135deg, #9B1C44 0%, #C4335E 50%, #D44F7E 100%); position: relative; overflow: hidden; margin: -16px -16px 0; }
+    .hero-banner::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 30%, rgba(0,0,0,0.25)); }
+    .hero-banner .hero-text { position: absolute; bottom: 16px; left: 20px; color: white; z-index: 1; }
+    .hero-banner .hero-text h3 { font-size: 22px; font-weight: 700; }
+    .hero-banner .hero-text p { font-size: 13px; opacity: 0.85; }
+
+    /* Record tool buttons */
+    .record-tools { display: flex; flex-direction: column; gap: 12px; }
+    .rec-btn { background: var(--card-bg); border-radius: 16px; padding: 18px; display: flex; align-items: center; gap: 14px; cursor: pointer; border: none; box-shadow: 0 1px 4px rgba(0,0,0,0.05); width: 100%; text-align: left; font-family: inherit; }
+    .rec-btn:active { transform: scale(0.98); }
+    .rec-ico { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 22px; }
+    .rec-ico.purple { background: #EDE7F6; }
+    .rec-ico.pink { background: #FCE7F0; }
+    .rec-ico.blue { background: #E3F2FD; }
+    .rec-text { flex: 1; }
+    .rec-text h3 { font-size: 15px; font-weight: 600; color: var(--text-dark); margin-bottom: 4px; }
+    .rec-text p { font-size: 12px; color: var(--text-mid); }
+    .rec-arrow { color: var(--text-light); font-size: 20px; }
+
+    /* Sub-page action buttons */
+    .sub-actions { display: flex; gap: 10px; margin-bottom: 16px; }
+    .sub-actions .el-button { flex: 1; }
+    .hist-title { font-size: 12px; font-weight: 700; color: var(--text-mid); margin-bottom: 10px; letter-spacing: 0.08em; }
 
     /* Record sub nav (within 记录 tab) */
     .record-sub-nav { display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; }
@@ -204,87 +235,181 @@
 
         <!-- ====== TAB 1: 记录 ====== -->
         <template v-if="currentTab === 'records'">
+          <!-- Record main page: hero + tool buttons -->
+          <template v-if="!recordSubPage">
+            <div class="hero-banner">
+              <div class="hero-text">
+                <h3>更年不期</h3>
+                <p>温暖陪伴，安心度过每一程</p>
+              </div>
+            </div>
+            <div class="section-title" style="margin: 20px 16px 12px;">健康管理工具</div>
+            <div style="padding: 0 16px;">
+              <div class="record-tools">
+                <button class="rec-btn" @click="recordSubPage = 'lab-tests'">
+                  <div class="rec-ico purple">🧪</div>
+                  <div class="rec-text"><h3>体检化验</h3><p>上传单据，AI 自动识别</p></div>
+                  <div class="rec-arrow">›</div>
+                </button>
+                <button class="rec-btn" @click="recordSubPage = 'daily-metrics'">
+                  <div class="rec-ico pink">📊</div>
+                  <div class="rec-text"><h3>日常数据</h3><p>体重、体脂等指标记录</p></div>
+                  <div class="rec-arrow">›</div>
+                </button>
+                <button class="rec-btn" @click="recordSubPage = 'scale-tests'">
+                  <div class="rec-ico blue">📝</div>
+                  <div class="rec-text"><h3>量表测试</h3><p>Kupperman · 荷尔蒙评估</p></div>
+                  <div class="rec-arrow">›</div>
+                </button>
+              </div>
+            </div>
+          </template>
+
           <!-- Record sub-page: LAB TESTS -->
           <template v-if="recordSubPage === 'lab-tests'">
-            <div class="record-header">
-              <el-button @click="showLabUpload = true">📷 上传化验单</el-button>
-              <el-button @click="showLabForm = true">✏️ 手动录入</el-button>
+            <div class="sub-header">
+              <button class="sub-back" @click="recordSubPage = null">‹</button>
+              <div><div class="sub-title">体检化验</div><div class="sub-sub">上传或手动录入化验结果</div></div>
             </div>
-            <div v-if="labTests.length === 0" class="empty-state">
-              <div class="empty-icon">🧪</div>
-              <p>还没有化验记录</p>
-            </div>
-            <div class="record-list" v-else>
-              <div v-for="t in labTests" :key="t.id" class="record-card">
-                <div class="rc-header"><span class="rc-date">{{ t.test_date }}</span></div>
-                <div class="rc-data">
-                  <div v-if="t.e2 != null" class="rc-item"><div class="rc-label">雌二醇 E2</div><div class="rc-value">{{ t.e2 }}</div></div>
-                  <div v-if="t.fsh != null" class="rc-item"><div class="rc-label">FSH</div><div class="rc-value">{{ t.fsh }}</div></div>
-                  <div v-if="t.lh != null" class="rc-item"><div class="rc-label">LH</div><div class="rc-value">{{ t.lh }}</div></div>
-                  <div v-if="t.progesterone != null" class="rc-item"><div class="rc-label">黄体酮</div><div class="rc-value">{{ t.progesterone }}</div></div>
-                  <div v-if="t.prolactin != null" class="rc-item"><div class="rc-label">催乳素</div><div class="rc-value">{{ t.prolactin }}</div></div>
-                  <div v-if="t.calcium != null" class="rc-item"><div class="rc-label">钙</div><div class="rc-value">{{ t.calcium }}</div></div>
-                  <div v-if="t.vitamin_d != null" class="rc-item"><div class="rc-label">维D</div><div class="rc-value">{{ t.vitamin_d }}</div></div>
-                </div>
-                <div v-if="t.notes" class="rc-notes">{{ t.notes }}</div>
-                <span class="rc-delete" @click="deleteLabTest(t.id)">✕</span>
+            <div class="sub-body">
+              <div class="sub-actions">
+                <el-button @click="showLabUpload = true">📷 上传化验单</el-button>
+                <el-button @click="showLabForm = true">✏️ 手动录入</el-button>
               </div>
+              <div v-if="labTests.length > 0">
+                <div class="hist-title">历史记录</div>
+                <div class="record-list">
+                  <div v-for="t in labTests" :key="t.id" class="record-card">
+                    <div class="rc-header"><span class="rc-date">{{ t.test_date }}</span></div>
+                    <div class="rc-data">
+                      <div v-if="t.e2 != null" class="rc-item"><div class="rc-label">E2</div><div class="rc-value">{{ t.e2 }}</div></div>
+                      <div v-if="t.fsh != null" class="rc-item"><div class="rc-label">FSH</div><div class="rc-value">{{ t.fsh }}</div></div>
+                      <div v-if="t.lh != null" class="rc-item"><div class="rc-label">LH</div><div class="rc-value">{{ t.lh }}</div></div>
+                      <div v-if="t.progesterone != null" class="rc-item"><div class="rc-label">黄体酮</div><div class="rc-value">{{ t.progesterone }}</div></div>
+                      <div v-if="t.prolactin != null" class="rc-item"><div class="rc-label">催乳素</div><div class="rc-value">{{ t.prolactin }}</div></div>
+                      <div v-if="t.calcium != null" class="rc-item"><div class="rc-label">钙</div><div class="rc-value">{{ t.calcium }}</div></div>
+                      <div v-if="t.vitamin_d != null" class="rc-item"><div class="rc-label">维D</div><div class="rc-value">{{ t.vitamin_d }}</div></div>
+                    </div>
+                    <div v-if="t.notes" class="rc-notes">{{ t.notes }}</div>
+                    <span class="rc-delete" @click="deleteLabTest(t.id)">✕</span>
+                  </div>
+                </div>
+              </div>
+              <div v-else class="empty-state"><div class="empty-icon">🧪</div><p>还没有化验记录</p></div>
             </div>
           </template>
 
           <!-- Record sub-page: DAILY METRICS -->
-          <template v-else-if="recordSubPage === 'daily-metrics'">
-            <div class="record-header">
-              <el-button @click="showDailyUpload = true">📷 上传截图</el-button>
-              <el-button @click="showDailyForm = true">✏️ 手动录入</el-button>
+          <template v-if="recordSubPage === 'daily-metrics'">
+            <div class="sub-header">
+              <button class="sub-back" @click="recordSubPage = null">‹</button>
+              <div><div class="sub-title">日常数据</div><div class="sub-sub">记录每日健康指标</div></div>
             </div>
-            <div v-if="dailyMetrics.length === 0" class="empty-state">
-              <div class="empty-icon">📊</div>
-              <p>还没有日常数据记录</p>
-            </div>
-            <div class="record-list" v-else>
-              <div v-for="m in dailyMetrics" :key="m.id" class="record-card">
-                <div class="rc-header"><span class="rc-date">{{ m.recorded_date }}</span></div>
-                <div class="rc-data">
-                  <div v-if="m.weight != null" class="rc-item"><div class="rc-label">体重</div><div class="rc-value">{{ m.weight }} kg</div></div>
-                  <div v-if="m.body_fat != null" class="rc-item"><div class="rc-label">体脂</div><div class="rc-value">{{ m.body_fat }}%</div></div>
-                  <div v-if="m.temperature != null" class="rc-item"><div class="rc-label">体温</div><div class="rc-value">{{ m.temperature }}</div></div>
-                  <div v-if="m.sleep_hours != null" class="rc-item"><div class="rc-label">睡眠</div><div class="rc-value">{{ m.sleep_hours }}h</div></div>
-                </div>
-                <div v-if="m.notes" class="rc-notes">{{ m.notes }}</div>
-                <span class="rc-delete" @click="deleteDailyMetric(m.id)">✕</span>
+            <div class="sub-body">
+              <div class="sub-actions">
+                <el-button @click="showDailyUpload = true">📷 上传截图</el-button>
+                <el-button @click="showDailyForm = true">✏️ 手动录入</el-button>
               </div>
+              <div v-if="dailyMetrics.length > 0">
+                <div class="hist-title">历史记录</div>
+                <div class="record-list">
+                  <div v-for="m in dailyMetrics" :key="m.id" class="record-card">
+                    <div class="rc-header"><span class="rc-date">{{ m.recorded_date }}</span></div>
+                    <div class="rc-data">
+                      <div v-if="m.weight != null" class="rc-item"><div class="rc-label">体重</div><div class="rc-value">{{ m.weight }} kg</div></div>
+                      <div v-if="m.body_fat != null" class="rc-item"><div class="rc-label">体脂</div><div class="rc-value">{{ m.body_fat }}%</div></div>
+                      <div v-if="m.temperature != null" class="rc-item"><div class="rc-label">体温</div><div class="rc-value">{{ m.temperature }}</div></div>
+                      <div v-if="m.sleep_hours != null" class="rc-item"><div class="rc-label">睡眠</div><div class="rc-value">{{ m.sleep_hours }}h</div></div>
+                    </div>
+                    <div v-if="m.notes" class="rc-notes">{{ m.notes }}</div>
+                    <span class="rc-delete" @click="deleteDailyMetric(m.id)">✕</span>
+                  </div>
+                </div>
+              </div>
+              <div v-else class="empty-state"><div class="empty-icon">📊</div><p>还没有日常数据记录</p></div>
             </div>
           </template>
 
           <!-- Record sub-page: SCALE TESTS -->
-          <template v-else-if="recordSubPage === 'scale-tests'">
-            <!-- Sub-tabs within scale tests -->
-            <div v-if="!kuppermanTaking && !showHormoneForm" class="record-sub-nav" style="margin-bottom: 12px;">
-              <div class="record-sub-btn" :class="{ active: scaleTestType === 'kupperman' }" @click="scaleTestType = 'kupperman'">Kupperman</div>
-              <div class="record-sub-btn" :class="{ active: scaleTestType === 'hormone' }" @click="scaleTestType = 'hormone'">荷尔蒙评估</div>
+          <template v-if="recordSubPage === 'scale-tests'">
+            <div class="sub-header">
+              <button class="sub-back" @click="recordSubPage = null">‹</button>
+              <div><div class="sub-title">量表测试</div><div class="sub-sub">选择量表开始评估</div></div>
             </div>
-
-            <template v-if="scaleTestType === 'kupperman'">
-              <div class="record-header" v-if="!kuppermanTaking">
-                <el-button @click="startKupperman" block>📋 开始 Kupperman 评估</el-button>
+            <div class="sub-body">
+              <div class="record-tools" style="margin-bottom: 16px;">
+                <button class="rec-btn" @click="scaleTestType = 'kupperman'">
+                  <div class="rec-ico purple">📋</div>
+                  <div class="rec-text"><h3>Kupperman 评估</h3><p>更年期症状评分 · 10题</p></div>
+                  <div class="rec-arrow">›</div>
+                </button>
+                <button class="rec-btn" @click="scaleTestType = 'hormone'">
+                  <div class="rec-ico pink">💊</div>
+                  <div class="rec-text"><h3>荷尔蒙评估</h3><p>多维度健康评估 · 26题</p></div>
+                  <div class="rec-arrow">›</div>
+                </button>
               </div>
-              <template v-if="kuppermanTaking">
-                <div v-for="q in kuppermanQuestions" :key="q.id" class="scale-question">
-                  <div class="sq-label">{{ q.label }}</div>
-                  <div class="sq-options">
-                    <div v-for="opt in q.options" :key="opt.score" class="sq-opt" :class="{ selected: kuppermanAnswers[q.id] === opt.score }" @click="kuppermanAnswers[q.id] = opt.score">
-                      {{ opt.label }}
+
+              <template v-if="scaleTestType === 'kupperman'">
+                <template v-if="!kuppermanTaking">
+                  <el-button @click="startKupperman" block size="large" type="primary" style="margin-bottom: 16px;">开始 Kupperman 评估</el-button>
+                </template>
+                <template v-if="kuppermanTaking">
+                  <div v-for="q in kuppermanQuestions" :key="q.id" class="scale-question">
+                    <div class="sq-label">{{ q.label }}</div>
+                    <div class="sq-options">
+                      <div v-for="opt in q.options" :key="opt.score" class="sq-opt" :class="{ selected: kuppermanAnswers[q.id] === opt.score }" @click="kuppermanAnswers[q.id] = opt.score">
+                        {{ opt.label }}
+                      </div>
                     </div>
                   </div>
-                </div>
-                <el-button type="primary" @click="submitKupperman" block size="large">提交评估</el-button>
+                  <el-button type="primary" @click="submitKupperman" block size="large">提交评估</el-button>
+                </template>
               </template>
-              <div v-if="!kuppermanTaking && scaleTests.filter(t => t.scale_type === 'kupperman').length > 0" style="margin-top: 12px;">
-                <div class="rc-date" style="margin-bottom: 8px;">历史记录</div>
+
+              <template v-if="scaleTestType === 'hormone'">
+                <template v-if="!hormoneTaking">
+                  <el-button @click="showHormoneForm = true" block size="large" type="primary" style="margin-bottom: 16px;">开始荷尔蒙评估</el-button>
+                </template>
+                <template v-if="hormoneTaking">
+                  <div style="display: flex; gap: 6px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 4px;">
+                    <div v-for="(dim, idx) in hormoneQuestions.dimensions" :key="idx"
+                         class="hormone-dim-tab"
+                         :class="{ active: hormoneCurrentDim === idx }"
+                         @click="hormoneCurrentDim = idx">
+                      {{ dim.name.split('(')[0] }}
+                    </div>
+                  </div>
+                  <div v-if="hormoneQuestions.dimensions[hormoneCurrentDim]" :key="hormoneCurrentDim">
+                    <div style="font-size: 12px; color: var(--text-mid); margin-bottom: 8px;">
+                      {{ hormoneQuestions.dimensions[hormoneCurrentDim].name }}
+                    </div>
+                    <div v-for="q in hormoneQuestions.dimensions[hormoneCurrentDim].questions" :key="q.id" class="scale-question">
+                      <div class="sq-label">{{ q.label }}</div>
+                      <div class="sq-options">
+                        <div v-for="opt in q.options" :key="opt.score" class="sq-opt" :class="{ selected: hormoneAnswers[q.id] === opt.score }" @click="hormoneAnswers[q.id] = opt.score">
+                          {{ opt.label }}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div style="display: flex; gap: 10px; margin-top: 12px;">
+                    <el-button @click="hormonePrevDim" :disabled="hormoneCurrentDim === 0" style="flex: 1;">上一组</el-button>
+                    <el-button v-if="hormoneCurrentDim < hormoneQuestions.dimensions.length - 1"
+                               type="primary" @click="hormoneNextDim" style="flex: 1;">下一组</el-button>
+                    <el-button v-else type="primary" @click="submitHormone" style="flex: 1;">提交评估</el-button>
+                  </div>
+                </template>
+              </template>
+
+              <div v-if="scaleTests.length > 0" style="margin-top: 16px;">
+                <div class="hist-title">历史评估</div>
                 <div class="record-list">
-                  <div v-for="t in scaleTests.filter(t => t.scale_type === 'kupperman')" :key="t.id" class="record-card">
-                    <div class="rc-header"><span class="rc-date">{{ t.test_date }}</span></div>
+                  <div v-for="t in scaleTests" :key="t.id" class="record-card">
+                    <div class="rc-header">
+                      <span class="rc-date">{{ t.test_date }}</span>
+                      <span style="font-size: 12px; color: var(--primary);">{{ t.scale_type === 'kupperman' ? 'Kupperman' : '荷尔蒙' }}</span>
+                    </div>
                     <div class="rc-data">
                       <div class="rc-item"><div class="rc-label">总分</div><div class="rc-value">{{ t.total_score }}</div></div>
                       <div v-if="t.severity_level" class="rc-item"><div class="rc-label">程度</div><div class="rc-value">{{ t.severity_level }}</div></div>
@@ -293,38 +418,6 @@
                   </div>
                 </div>
               </div>
-            </template>
-
-            <template v-else-if="scaleTestType === 'hormone'">
-              <div class="record-header" v-if="!hormoneTaking && !showHormoneForm">
-                <el-button @click="showHormoneForm = true" block>📋 开始荷尔蒙评估</el-button>
-              </div>
-              <div v-if="!hormoneTaking && scaleTests.filter(t => t.scale_type === 'hormone_health').length > 0" style="margin-top: 12px;">
-                <div class="rc-date" style="margin-bottom: 8px;">历史记录</div>
-                <div class="record-list">
-                  <div v-for="t in scaleTests.filter(t => t.scale_type === 'hormone_health')" :key="t.id" class="record-card">
-                    <div class="rc-header"><span class="rc-date">{{ t.test_date }}</span></div>
-                    <div class="rc-data">
-                      <div class="rc-item"><div class="rc-label">总分</div><div class="rc-value">{{ t.total_score }}</div></div>
-                      <div v-if="t.severity_level" class="rc-item"><div class="rc-label">程度</div><div class="rc-value">{{ t.severity_level }}</div></div>
-                    </div>
-                    <span class="rc-delete" @click="deleteScaleTest(t.id)">✕</span>
-                  </div>
-                </div>
-              </div>
-            </template>
-          </template>
-
-          <!-- Record default: show 3 sub-nav buttons -->
-          <template v-if="!recordSubPage">
-            <div class="record-sub-nav">
-              <div class="record-sub-btn" @click="recordSubPage = 'lab-tests'">🧪 体检化验</div>
-              <div class="record-sub-btn" @click="recordSubPage = 'daily-metrics'">📊 日常数据</div>
-              <div class="record-sub-btn" @click="recordSubPage = 'scale-tests'">📝 量表测试</div>
-            </div>
-            <div class="empty-state" style="padding-top: 60px;">
-              <div class="empty-icon">📋</div>
-              <p>选择上方记录类型</p>
             </div>
           </template>
         </template>
