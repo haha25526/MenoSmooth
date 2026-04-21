@@ -91,7 +91,7 @@ templates = Jinja2Templates(directory=str(templates_path))
 
 static_dir = Path(__file__).parent.parent / "static"
 static_dir.mkdir(exist_ok=True)
-app.mount("/backstage/static", StaticFiles(directory=str(static_dir)), name="backstage_static")
+app.mount("/meno/backstage/static", StaticFiles(directory=str(static_dir)), name="backstage_static")
 
 
 def get_current_admin(request: Request):
@@ -100,36 +100,36 @@ def get_current_admin(request: Request):
         raise HTTPException(status_code=401, detail="Not authenticated")
 
 
-@app.get("/backstage/login", response_class=HTMLResponse)
+@app.get("/meno/backstage/login", response_class=HTMLResponse)
 async def login_page(request: Request):
     token = request.cookies.get("backstage_token")
     if token == VALID_ADMIN_TOKEN:
-        return RedirectResponse(url="/backstage/dashboard", status_code=302)
+        return RedirectResponse(url="/meno/backstage/dashboard", status_code=302)
     return templates.TemplateResponse("login.html", {"request": request})
 
 
-@app.post("/backstage/login")
+@app.post("/meno/backstage/login")
 async def login_submit(request: Request, password: str = Form(...)):
     if verify_admin_password(password):
-        response = RedirectResponse(url="/backstage/dashboard", status_code=302)
+        response = RedirectResponse(url="/meno/backstage/dashboard", status_code=302)
         response.set_cookie(key="backstage_token", value=VALID_ADMIN_TOKEN, httponly=True, samesite="lax", max_age=86400 * 7)
         return response
     return templates.TemplateResponse("login.html", {"request": request, "error": "密码错误"})
 
 
-@app.get("/backstage/logout")
+@app.get("/meno/backstage/logout")
 async def logout():
-    response = RedirectResponse(url="/backstage/login", status_code=302)
+    response = RedirectResponse(url="/meno/backstage/login", status_code=302)
     response.delete_cookie("backstage_token")
     return response
 
 
-@app.get("/backstage/dashboard", response_class=HTMLResponse)
+@app.get("/meno/backstage/dashboard", response_class=HTMLResponse)
 async def dashboard(request: Request):
     try:
         get_current_admin(request)
     except HTTPException:
-        return RedirectResponse(url="/backstage/login", status_code=302)
+        return RedirectResponse(url="/meno/backstage/login", status_code=302)
 
     async with async_session_maker() as db:
         total_users = await db.scalar(select(func.count(users.c.id))) or 0
@@ -178,12 +178,12 @@ async def dashboard(request: Request):
         })
 
 
-@app.get("/backstage/users", response_class=HTMLResponse)
+@app.get("/meno/backstage/users", response_class=HTMLResponse)
 async def user_list(request: Request, page: int = 1, page_size: int = 20, search: str = None):
     try:
         get_current_admin(request)
     except HTTPException:
-        return RedirectResponse(url="/backstage/login", status_code=302)
+        return RedirectResponse(url="/meno/backstage/login", status_code=302)
 
     async with async_session_maker() as db:
         base_query = select(users)
@@ -205,12 +205,12 @@ async def user_list(request: Request, page: int = 1, page_size: int = 20, search
         })
 
 
-@app.get("/backstage/users/{user_id}", response_class=HTMLResponse)
+@app.get("/meno/backstage/users/{user_id}", response_class=HTMLResponse)
 async def user_detail(request: Request, user_id: str):
     try:
         get_current_admin(request)
     except HTTPException:
-        return RedirectResponse(url="/backstage/login", status_code=302)
+        return RedirectResponse(url="/meno/backstage/login", status_code=302)
 
     try:
         uid = UUID(user_id)
