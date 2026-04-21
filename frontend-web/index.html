@@ -106,6 +106,11 @@
     .scale-result .sr-score { font-size: 48px; font-weight: bold; color: var(--primary-dark); }
     .scale-result .sr-level { font-size: 16px; color: var(--text-mid); margin-top: 4px; }
 
+    /* Hormone dimension tabs */
+    .hormone-dim-tab { padding: 6px 12px; border-radius: 16px; background: var(--bg-warm); font-size: 12px; color: var(--text-mid); cursor: pointer; white-space: nowrap; border: 1px solid transparent; transition: all 0.2s; }
+    .hormone-dim-tab.active { background: var(--primary); color: white; }
+    .hormone-dim-tab:hover:not(.active) { border-color: var(--primary); color: var(--primary); }
+
     .empty-state { text-align: center; padding: 40px 20px; color: var(--text-light); }
     .empty-state .empty-icon { font-size: 48px; margin-bottom: 8px; }
 
@@ -452,22 +457,64 @@
       <el-button type="primary" @click="submitDailyForm" block>确认保存</el-button>
     </el-dialog>
 
-    <!-- Hormone health assessment form -->
-    <el-dialog v-model="showHormoneForm" title="荷尔蒙健康定量评估" width="90%">
-      <p style="color: #999; font-size: 13px; margin-bottom: 12px;">请填写以下指标进行评估：</p>
-      <div class="form-grid">
-        <el-form-item label="日期" class="form-full">
-          <el-date-picker v-model="hormoneForm.test_date" type="date" format="YYYY-MM-DD" value-format="YYYY-MM-DD" style="width: 100%;" />
-        </el-form-item>
-        <el-form-item label="E2 (pg/mL)"><el-input-number v-model="hormoneForm.e2" :step="0.1" controls-position="right" style="width: 100%;" /></el-form-item>
-        <el-form-item label="FSH (mIU/mL)"><el-input-number v-model="hormoneForm.fsh" :step="0.1" controls-position="right" style="width: 100%;" /></el-form-item>
-        <el-form-item label="LH (mIU/mL)"><el-input-number v-model="hormoneForm.lh" :step="0.1" controls-position="right" style="width: 100%;" /></el-form-item>
-        <el-form-item label="孕酮 (ng/mL)"><el-input-number v-model="hormoneForm.progesterone" :step="0.1" controls-position="right" style="width: 100%;" /></el-form-item>
-        <el-form-item label="睾酮 (ng/dL)"><el-input-number v-model="hormoneForm.testosterone" :step="0.1" controls-position="right" style="width: 100%;" /></el-form-item>
-        <el-form-item label="TSH (mIU/L)"><el-input-number v-model="hormoneForm.tsh" :step="0.01" controls-position="right" style="width: 100%;" /></el-form-item>
-        <el-form-item label="备注" class="form-full"><el-input v-model="hormoneForm.notes" type="textarea" rows="2" /></el-form-item>
+    <!-- Hormone health assessment -->
+    <el-dialog v-model="showHormoneForm" title="荷尔蒙健康定量评估" width="90%" :close-on-click-modal="false">
+      <template v-if="!hormoneTaking">
+        <p style="color: #999; font-size: 13px; margin-bottom: 12px;">根据过去3个月的体验，选择最符合的选项</p>
+        <el-button type="primary" @click="startHormone" block size="large">开始评估</el-button>
+      </template>
+
+      <template v-else>
+        <!-- Dimension tabs -->
+        <div style="display: flex; gap: 6px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 4px;">
+          <div v-for="(dim, idx) in hormoneQuestions.dimensions" :key="idx"
+               class="hormone-dim-tab"
+               :class="{ active: hormoneCurrentDim === idx }"
+               @click="hormoneCurrentDim = idx">
+            {{ dim.name.split('（')[0] }}
+          </div>
+        </div>
+
+        <!-- Current dimension questions -->
+        <div v-if="hormoneQuestions.dimensions[hormoneCurrentDim]" :key="hormoneCurrentDim">
+          <div style="font-size: 12px; color: var(--text-mid); margin-bottom: 8px;">
+            {{ hormoneQuestions.dimensions[hormoneCurrentDim].name }}
+          </div>
+          <div v-for="q in hormoneQuestions.dimensions[hormoneCurrentDim].questions" :key="q.id" class="scale-question">
+            <div class="sq-label">{{ q.label }}</div>
+            <div class="sq-options">
+              <div v-for="opt in q.options" :key="opt.score" class="sq-opt" :class="{ selected: hormoneAnswers[q.id] === opt.score }" @click="hormoneAnswers[q.id] = opt.score">
+                {{ opt.label }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Navigation -->
+        <div style="display: flex; gap: 10px; margin-top: 12px;">
+          <el-button @click="hormonePrevDim" :disabled="hormoneCurrentDim === 0" style="flex: 1;">上一组</el-button>
+          <el-button v-if="hormoneCurrentDim < hormoneQuestions.dimensions.length - 1"
+                     type="primary" @click="hormoneNextDim" style="flex: 1;">下一组</el-button>
+          <el-button v-else type="primary" @click="submitHormone" style="flex: 1;">提交评估</el-button>
+        </div>
+      </template>
+    </el-dialog>
+
+    <!-- Hormone result -->
+    <el-dialog v-model="showHormoneResult" title="评估结果" width="90%">
+      <div class="scale-result">
+        <div class="sr-score">{{ hormoneResult.total_score }}</div>
+        <div class="sr-level" :style="{ color: hormoneResult.color }">{{ hormoneResult.level }}</div>
+        <div style="margin-top: 8px; font-size: 13px; color: var(--text-mid);">{{ hormoneResult.advice }}</div>
       </div>
-      <el-button type="primary" @click="submitHormoneForm" block>保存评估</el-button>
+      <!-- Dimension breakdown -->
+      <div style="margin-top: 16px;">
+        <div style="font-size: 14px; font-weight: 600; margin-bottom: 12px;">各维度得分</div>
+        <div v-for="(dim, idx) in hormoneResult.dimensions" :key="idx" style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border);">
+          <span style="font-size: 13px; color: var(--text-dark);">{{ dim.name }}</span>
+          <span style="font-size: 14px; font-weight: 600; color: var(--primary-dark);">{{ dim.score }} / {{ dim.max }}</span>
+        </div>
+      </div>
     </el-dialog>
   </div>
 
@@ -526,7 +573,12 @@
         const kuppermanQuestions = ref([]);
         const kuppermanAnswers = reactive({});
         const showHormoneForm = ref(false);
-        const hormoneForm = reactive({ test_date: new Date().toISOString().slice(0, 10), e2: null, fsh: null, lh: null, progesterone: null, testosterone: null, tsh: null, notes: '' });
+        const hormoneTaking = ref(false);
+        const hormoneCurrentDim = ref(0);
+        const hormoneQuestions = reactive({ dimensions: [] });
+        const hormoneAnswers = reactive({});
+        const showHormoneResult = ref(false);
+        const hormoneResult = reactive({ total_score: 0, level: '', advice: '', color: '', dimensions: [] });
 
         async function sendCode() {
           if (!isValidPhone.value) return;
@@ -740,17 +792,62 @@
           } catch (e) { ElementPlus.ElMessage.error(e.message); }
         }
 
-        async function submitHormoneForm() {
-          const scores = { e2: hormoneForm.e2, fsh: hormoneForm.fsh, lh: hormoneForm.lh, progesterone: hormoneForm.progesterone, testosterone: hormoneForm.testosterone, tsh: hormoneForm.tsh };
+        async function startHormone() {
+          try {
+            const data = await api.get('/scale-tests/hormone/questions');
+            hormoneQuestions.dimensions = data.dimensions;
+            hormoneTaking.value = true;
+            hormoneCurrentDim.value = 0;
+            Object.keys(hormoneAnswers).forEach(k => delete hormoneAnswers[k]);
+          } catch (e) { ElementPlus.ElMessage.error(e.message); }
+        }
+
+        function hormoneNextDim() { hormoneCurrentDim.value++; }
+        function hormonePrevDim() { hormoneCurrentDim.value--; }
+
+        async function submitHormone() {
+          // Calculate scores
+          const scores = { ...hormoneAnswers };
+          const total = Object.values(scores).reduce((a, b) => a + (b || 0), 0);
+
+          // Get level
+          let level, advice;
+          if (total >= 52) { level = "严重失衡"; advice = "建议尽快就医，进行全面荷尔蒙检测和专业治疗"; }
+          else if (total >= 39) { level = "中度失衡"; advice = "建议进行生活方式调整，并在3个月后复测"; }
+          else if (total >= 26) { level = "轻度失衡"; advice = "建议关注日常作息和饮食，适当增加运动"; }
+          else if (total >= 13) { level = "基本正常"; advice = "身体状况良好，继续保持健康的生活方式"; }
+          else { level = "状态优秀"; advice = "荷尔蒙水平健康，请继续保持"; }
+
+          let color = 'var(--primary-dark)';
+          if (total >= 52) color = '#E74C3C';
+          else if (total >= 39) color = '#E67E22';
+          else if (total >= 26) color = '#F39C12';
+          else if (total >= 13) color = 'var(--primary-dark)';
+
+          // Dimension breakdown
+          const dimensions = hormoneQuestions.dimensions.map(dim => {
+            const dimScore = dim.questions.reduce((sum, q) => sum + (scores[q.id] || 0), 0);
+            const maxScore = dim.questions.length * 3;
+            return { name: dim.name, score: dimScore, max: maxScore };
+          });
+
           try {
             await api.post('/scale-tests/', {
-              test_date: hormoneForm.test_date, scale_type: 'hormone_health',
-              scores, total_score: 0, notes: hormoneForm.notes,
+              test_date: new Date().toISOString().slice(0, 10),
+              scale_type: 'hormone_health', scores, total_score: total, severity_level: level,
             });
+
+            hormoneResult.total_score = total;
+            hormoneResult.level = level;
+            hormoneResult.advice = advice;
+            hormoneResult.color = color;
+            hormoneResult.dimensions = dimensions;
+
             showHormoneForm.value = false;
-            Object.assign(hormoneForm, { test_date: new Date().toISOString().slice(0, 10), e2: null, fsh: null, lh: null, progesterone: null, testosterone: null, tsh: null, notes: '' });
+            hormoneTaking.value = false;
+            showHormoneResult.value = true;
             await loadScaleTests();
-            ElementPlus.ElMessage.success('评估已保存');
+            ElementPlus.ElMessage.success('评估完成！');
           } catch (e) { ElementPlus.ElMessage.error(e.message); }
         }
 
@@ -831,7 +928,9 @@
           labTests, showLabForm, showLabUpload, showLabConfirm, labForm, submitLabForm, deleteLabTest,
           dailyMetrics, showDailyForm, showDailyUpload, showDailyConfirm, dailyForm, submitDailyForm, deleteDailyMetric,
           scaleTests, kuppermanTaking, kuppermanQuestions, kuppermanAnswers, startKupperman, submitKupperman,
-          showHormoneForm, hormoneForm, submitHormoneForm, deleteScaleTest,
+          showHormoneForm, hormoneTaking, hormoneCurrentDim, hormoneQuestions, hormoneAnswers,
+          startHormone, hormoneNextDim, hormonePrevDim, submitHormone,
+          showHormoneResult, hormoneResult, deleteScaleTest,
           goTo, sendMessage, handleLogout,
         };
       }
