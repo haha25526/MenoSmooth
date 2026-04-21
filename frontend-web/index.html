@@ -900,7 +900,8 @@
 
         async function startKupperman() {
           try {
-            kuppermanQuestions.value = await api.get('/scale-tests/kupperman/questions');
+            const data = await api.get('/scale-tests/kupperman/questions');
+            kuppermanQuestions.value = data.questions;
             kuppermanTaking.value = true;
             scaleActiveTest.value = 'kupperman';
             Object.keys(kuppermanAnswers).forEach(k => delete kuppermanAnswers[k]);
