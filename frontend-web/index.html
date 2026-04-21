@@ -704,6 +704,8 @@
         ];
         const avatarDisplay = computed(() => profileForm.avatar || user.value?.avatar || avatarOptions[0].value);
 
+        // Load user profile on init
+
         // Lab tests
         const labTests = ref([]);
         const showLabForm = ref(false);

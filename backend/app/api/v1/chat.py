@@ -61,6 +61,46 @@ async def send_message(
         from datetime import date
         user_profile["age"] = (date.today() - current_user.birthday).days // 365
 
+    # Get user's recent scale test results
+    result = await db.execute(
+        select(ChatMessage).where(
+            ChatMessage.user_id == current_user.id,
+        ).order_by(ChatMessage.created_at.desc()).limit(10)
+    )
+
+    from app.models.scale_test import ScaleTest
+    scale_result = await db.execute(
+        select(ScaleTest).where(ScaleTest.user_id == current_user.id).order_by(ScaleTest.created_at.desc()).limit(5)
+    )
+    scale_tests = scale_result.scalars().all()
+    if scale_tests:
+        scale_summary = "\n用户最近的量表测试结果：\n"
+        for st in scale_tests:
+            st_type = "Kupperman" if st.scale_type == "kupperman" else "荷尔蒙评估"
+            scale_summary += f"- {st_type} ({st.test_date}): 总分{st.total_score}，程度{st.severity_level or '未知'}\n"
+        user_profile["scale_tests"] = scale_summary
+
+    # Get user's recent lab test results
+    from app.models.lab_test import LabTest
+    lab_result = await db.execute(
+        select(LabTest).where(LabTest.user_id == current_user.id).order_by(LabTest.created_at.desc()).limit(5)
+    )
+    lab_tests = lab_result.scalars().all()
+    if lab_tests:
+        lab_summary = "\n用户最近的化验结果：\n"
+        for lt in lab_tests:
+            items = []
+            if lt.e2 is not None: items.append(f"E2={lt.e2}")
+            if lt.fsh is not None: items.append(f"FSH={lt.fsh}")
+            if lt.lh is not None: items.append(f"LH={lt.lh}")
+            if lt.progesterone is not None: items.append(f"孕酮={lt.progesterone}")
+            if lt.prolactin is not None: items.append(f"PRL={lt.prolactin}")
+            if lt.calcium is not None: items.append(f"钙={lt.calcium}")
+            if lt.vitamin_d is not None: items.append(f"维D={lt.vitamin_d}")
+            if items:
+                lab_summary += f"- {lt.test_date}: {', '.join(items)}\n"
+        user_profile["lab_tests"] = lab_summary
+
     # Get AI reply
     try:
         reply = await llm_service.chat(messages, user_profile=user_profile)

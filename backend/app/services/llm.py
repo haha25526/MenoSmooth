@@ -40,7 +40,15 @@ class LLMService:
         # Build system prompt with user context
         system_content = SYSTEM_PROMPT
         if user_profile:
-            system_content += f"\n\n用户信息：年龄约{user_profile.get('age', '未知')}岁，身高{user_profile.get('height', '未知')}cm。"
+            parts = []
+            if user_profile.get('age') or user_profile.get('height'):
+                parts.append(f"用户信息：年龄约{user_profile.get('age', '未知')}岁，身高{user_profile.get('height', '未知')}cm。")
+            if user_profile.get('scale_tests'):
+                parts.append(user_profile['scale_tests'])
+            if user_profile.get('lab_tests'):
+                parts.append(user_profile['lab_tests'])
+            if parts:
+                system_content += "\n\n" + "\n".join(parts)
         if knowledge_base:
             system_content += f"\n\n参考知识库：\n{knowledge_base}"
 
