@@ -6,6 +6,12 @@ from pathlib import Path
 from datetime import datetime, timedelta, date
 from uuid import UUID
 
+# Add project root and backend to path
+project_root = Path(__file__).parent.parent.parent
+backend_path = project_root / "backend"
+sys.path.insert(0, str(backend_path))
+sys.path.insert(0, str(project_root))
+
 from fastapi import FastAPI, Request, Form, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
