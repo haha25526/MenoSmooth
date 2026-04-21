@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>登录 - 更年不期后台</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #FAFAF7; margin: 0; }
+        .login-card { background: white; border-radius: 16px; padding: 40px; width: 320px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); text-align: center; }
+        .login-card h2 { color: #4A7360; margin-bottom: 24px; font-size: 20px; }
+        .login-card input { width: 100%; padding: 12px 16px; border: 1px solid #E8E4DE; border-radius: 8px; font-size: 15px; margin-bottom: 16px; box-sizing: border-box; }
+        .login-card button { width: 100%; padding: 12px; background: #5B8A72; color: white; border: none; border-radius: 8px; font-size: 15px; cursor: pointer; }
+        .login-card button:hover { background: #4A7360; }
+        .error { color: #E74C3C; font-size: 13px; margin-bottom: 12px; }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <h2>🌸 更年不期后台</h2>
+        {% if error %}<div class="error">{{ error }}</div>{% endif %}
+        <form method="post">
+            <input type="password" name="password" placeholder="管理员密码" autofocus required />
+            <button type="submit">登录</button>
+        </form>
+    </div>
+</body>
+</html>

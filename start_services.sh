@@ -7,6 +7,7 @@ mkdir -p "$LOG_DIR"
 
 SERVICES=(
     "meno-backend:8004:/root/MenoSmooth/backend:app.main:app"
+    "meno-backstage:8005:/root/MenoSmooth/backstage:app.main:app"
 )
 
 is_running() {

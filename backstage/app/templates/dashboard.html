@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}数据概览 - 更年不期后台{% endblock %}
+{% block content %}
+<h2 style="margin-bottom: 16px; color: #4A7360;">数据概览</h2>
+
+<div class="stat-grid">
+    <div class="stat-card"><div class="stat-value">{{ stats.total_users }}</div><div class="stat-label">总用户数</div></div>
+    <div class="stat-card"><div class="stat-value">{{ stats.total_pv }}</div><div class="stat-label">总PV</div></div>
+    <div class="stat-card"><div class="stat-value">{{ stats.total_uv }}</div><div class="stat-label">总UV</div></div>
+    <div class="stat-card"><div class="stat-value">{{ stats.today_pv }}</div><div class="stat-label">今日PV</div></div>
+    <div class="stat-card"><div class="stat-value">{{ stats.today_uv }}</div><div class="stat-label">今日UV</div></div>
+    <div class="stat-card"><div class="stat-value">{{ stats.total_labs }}</div><div class="stat-label">化验记录</div></div>
+    <div class="stat-card"><div class="stat-value">{{ stats.total_scales }}</div><div class="stat-label">量表记录</div></div>
+    <div class="stat-card"><div class="stat-value">{{ stats.total_chat_sessions }}</div><div class="stat-label">对话会话</div></div>
+</div>
+
+<div class="card" style="margin-top: 16px;">
+    <div class="card-title">7天访问趋势</div>
+    <table>
+        <thead><tr><th>日期</th><th>PV</th><th>UV</th></tr></thead>
+        <tbody>
+            {% for day in stats.trend %}
+            <tr><td>{{ day.date }}</td><td>{{ day.pv }}</td><td>{{ day.uv }}</td></tr>
+            {% else %}
+            <tr><td colspan="3" class="text-center text-muted">暂无数据</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="card">
+    <div class="card-title">页面访问排行</div>
+    <table>
+        <thead><tr><th>页面</th><th>PV</th><th>UV</th></tr></thead>
+        <tbody>
+            {% for page in stats.page_stats[:10] %}
+            <tr><td>{{ page.page_name }}</td><td>{{ page.pv }}</td><td>{{ page.uv }}</td></tr>
+            {% else %}
+            <tr><td colspan="3" class="text-center text-muted">暂无数据</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

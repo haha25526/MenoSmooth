@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}用户管理 - 更年不期后台{% endblock %}
+{% block content %}
+<h2 style="margin-bottom: 16px; color: #4A7360;">用户管理</h2>
+
+<div class="search-box">
+    <form method="get" style="display: flex; gap: 10px; flex: 1;">
+        <input type="text" name="search" placeholder="搜索手机号或昵称" value="{{ search or '' }}" />
+        <button type="submit" class="btn">搜索</button>
+    </form>
+</div>
+
+<div class="card">
+    <table>
+        <thead><tr><th>用户</th><th>手机号</th><th>注册时间</th><th>操作</th></tr></thead>
+        <tbody>
+            {% for u in users %}
+            <tr>
+                <td>
+                    {% if u.avatar %}
+                    <img src="{{ u.avatar }}" class="avatar-sm" onerror="this.style.display='none'" />
+                    {% endif %}
+                    {{ u.nickname or '未设置' }}
+                </td>
+                <td>{{ u.phone }}</td>
+                <td>{{ u.created_at.strftime('%Y-%m-%d %H:%M') if u.created_at else '-' }}</td>
+                <td><a href="/backstage/users/{{ u.id }}" class="btn">详情</a></td>
+            </tr>
+            {% else %}
+            <tr><td colspan="4" class="text-center text-muted">暂无用户</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if total_pages > 1 %}
+<div class="pagination">
+    {% if page > 1 %}<a href="?page={{ page-1 }}&search={{ search or '' }}">上一页</a>{% endif %}
+    {% for p in range(1, total_pages + 1) %}
+        {% if p == page %}<span class="active">{{ p }}</span>
+        {% elif p == 1 or p == total_pages or (p >= page - 2 and p <= page + 2) %}
+            <a href="?page={{ p }}&search={{ search or '' }}">{{ p }}</a>
+        {% elif p == page - 3 or p == page + 3 %}<span>...</span>
+        {% endif %}
+    {% endfor %}
+    {% if page < total_pages %}<a href="?page={{ page+1 }}&search={{ search or '' }}">下一页</a>{% endif %}
+</div>
+{% endif %}
+{% endblock %}

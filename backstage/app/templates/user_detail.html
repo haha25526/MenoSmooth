@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}{{ user.nickname or '用户' }} - 更年不期后台{% endblock %}
+{% block content %}
+<h2 style="margin-bottom: 16px; color: #4A7360;">
+    <a href="/backstage/users" style="color: #5B8A72; text-decoration: none;">← 返回</a>
+    &nbsp;{{ user.nickname or '用户' }}
+</h2>
+
+<div class="card">
+    <div class="card-title">基本信息</div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <div><span class="text-muted">手机：</span>{{ user.phone }}</div>
+        <div><span class="text-muted">生日：</span>{{ user.birthday or '未设置' }}</div>
+        <div><span class="text-muted">身高：</span>{{ user.height or '未设置' }} cm</div>
+        <div><span class="text-muted">注册：</span>{{ user.created_at.strftime('%Y-%m-%d %H:%M') if user.created_at else '-' }}</div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-title">化验记录（{{ lab_tests|length }}条）</div>
+    {% if lab_tests %}
+    <table>
+        <thead><tr><th>日期</th><th>E2</th><th>FSH</th><th>LH</th><th>孕酮</th><th>钙</th><th>维D</th></tr></thead>
+        <tbody>
+            {% for t in lab_tests %}
+            <tr>
+                <td>{{ t.test_date }}</td>
+                <td>{{ t.e2 or '-' }}</td><td>{{ t.fsh or '-' }}</td><td>{{ t.lh or '-' }}</td>
+                <td>{{ t.progesterone or '-' }}</td><td>{{ t.calcium or '-' }}</td><td>{{ t.vitamin_d or '-' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}<p class="text-muted text-center">暂无记录</p>{% endif %}
+</div>
+
+<div class="card">
+    <div class="card-title">量表测试（{{ scale_tests|length }}条）</div>
+    {% if scale_tests %}
+    <table>
+        <thead><tr><th>日期</th><th>类型</th><th>总分</th><th>程度</th></tr></thead>
+        <tbody>
+            {% for t in scale_tests %}
+            <tr>
+                <td>{{ t.test_date }}</td>
+                <td>{{ 'Kupperman' if t.scale_type == 'kupperman' else '荷尔蒙评估' }}</td>
+                <td>{{ t.total_score }}</td>
+                <td>{{ t.severity_level or '-' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}<p class="text-muted text-center">暂无记录</p>{% endif %}
+</div>
+
+<div class="card">
+    <div class="card-title">日常数据（{{ daily_metrics|length }}条）</div>
+    {% if daily_metrics %}
+    <table>
+        <thead><tr><th>日期</th><th>体重</th><th>体脂</th><th>体温</th><th>睡眠</th></tr></thead>
+        <tbody>
+            {% for m in daily_metrics %}
+            <tr>
+                <td>{{ m.recorded_date }}</td>
+                <td>{{ m.weight or '-' }} kg</td><td>{{ m.body_fat or '-' }}%</td>
+                <td>{{ m.temperature or '-' }}</td><td>{{ m.sleep_hours or '-' }}h</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}<p class="text-muted text-center">暂无记录</p>{% endif %}
+</div>
+
+<div class="card">
+    <div class="card-title">对话会话（{{ chat_sessions|length }}个）</div>
+    {% if chat_sessions %}
+    <table>
+        <thead><tr><th>会话ID</th><th>消息数</th><th>最后活跃</th></tr></thead>
+        <tbody>
+            {% for s in chat_sessions %}
+            <tr><td>{{ s[0][:16] }}...</td><td>{{ s[1] }}</td><td>{{ s[2].strftime('%Y-%m-%d %H:%M') if s[2] else '-' }}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}<p class="text-muted text-center">暂无记录</p>{% endif %}
+</div>
+{% endblock %}
