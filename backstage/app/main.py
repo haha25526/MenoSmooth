@@ -5,9 +5,11 @@ import sys
 from pathlib import Path
 from datetime import datetime, timedelta, date
 
-# Add backend to path so we can import its models
-backend_path = Path(__file__).parent.parent.parent / "backend"
+# Add project root and backend to path
+project_root = Path(__file__).parent.parent.parent
+backend_path = project_root / "backend"
 sys.path.insert(0, str(backend_path))
+sys.path.insert(0, str(project_root))
 
 from uuid import UUID
 from fastapi import FastAPI, Request, Form, HTTPException
