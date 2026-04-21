@@ -39,7 +39,7 @@ async def upload_avatar(
     db: AsyncSession = Depends(get_db),
 ):
     """Upload avatar image"""
-    static_dir = Path(__file__).parent.parent.parent.parent / "static" / "avatars"
+    static_dir = Path("/usr/share/nginx/meno/static/avatars")
     static_dir.mkdir(parents=True, exist_ok=True)
 
     ext = Path(file.filename).suffix if file.filename else ".jpg"
@@ -49,7 +49,7 @@ async def upload_avatar(
     content = await file.read()
     filepath.write_bytes(content)
 
-    avatar_url = f"/static/avatars/{filename}"
+    avatar_url = f"/meno/static/avatars/{filename}"
     current_user.avatar = avatar_url
     await db.commit()
 

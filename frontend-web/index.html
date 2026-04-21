@@ -558,9 +558,9 @@
         const profileForm = reactive({ nickname: '', avatar: '', birthday: '', height: 160 });
         const showAvatarPicker = ref(false);
         const avatarOptions = [
-          { label: '书房', value: '/static/avatars/1.jpg' },
-          { label: '画室', value: '/static/avatars/2.jpg' },
-          { label: '花店', value: '/static/avatars/3.jpg' },
+          { label: '书房', value: '/meno/static/avatars/1.jpg' },
+          { label: '画室', value: '/meno/static/avatars/2.jpg' },
+          { label: '花店', value: '/meno/static/avatars/3.jpg' },
         ];
         const avatarDisplay = computed(() => profileForm.avatar || user.value?.avatar || avatarOptions[0].value);
 
