@@ -4,7 +4,7 @@ MenoSmooth Backstage - Admin Dashboard
 import sys
 from pathlib import Path
 from datetime import datetime, timedelta, date
-from uuid import UUID
+from uuid import UUID as pyUUID
 
 # Add project root and backend to path
 project_root = Path(__file__).parent.parent.parent
@@ -213,7 +213,7 @@ async def user_detail(request: Request, user_id: str):
         return RedirectResponse(url="/meno/backstage/login", status_code=302)
 
     try:
-        uid = UUID(user_id)
+        uid = pyUUID(user_id)
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid user ID")
 
