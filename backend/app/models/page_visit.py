@@ -18,5 +18,7 @@ class PageVisit(Base):
     entrance_time = Column(DateTime(timezone=True), server_default=func.now())
     device_type = Column(String(32), nullable=True)
 
+    user = relationship("User", back_populates="page_visits")
+
     def __repr__(self):
         return f"<PageVisit(id={self.id}, page={self.page_name})>"
