@@ -39,7 +39,10 @@ async def upload_avatar(
     db: AsyncSession = Depends(get_db),
 ):
     """Upload avatar image"""
-    static_dir = Path("/usr/share/nginx/meno/static/avatars")
+    import shutil
+
+    # Save to frontend static dir (served by nginx)
+    static_dir = Path(__file__).parent.parent.parent.parent.parent / "frontend-web" / "static" / "avatars"
     static_dir.mkdir(parents=True, exist_ok=True)
 
     ext = Path(file.filename).suffix if file.filename else ".jpg"

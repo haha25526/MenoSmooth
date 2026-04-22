@@ -31,7 +31,7 @@ const api = {
   // File upload
   async uploadFile(path, file, extra = {}) {
     const formData = new FormData();
-    formData.append('image', file);
+    formData.append('file', file);
     const headers = {};
     const token = storage.get('access_token');
     if (token) headers['Authorization'] = `Bearer ${token}`;

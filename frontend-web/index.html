@@ -46,15 +46,22 @@
     #app { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; }
 
     /* Login */
-    .login-page { display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; padding: 32px; background: var(--bg); }
-    .login-logo { font-size: 56px; margin-bottom: 12px; }
-    .login-title { font-size: 26px; font-weight: bold; color: var(--primary-dark); margin-bottom: 4px; letter-spacing: 2px; }
-    .login-subtitle { font-size: 13px; color: var(--text-mid); margin-bottom: 36px; }
+    .login-page { display: flex; flex-direction: column; min-height: 100vh; background: url('/meno/static/hero/login-bg.jpg') center / cover no-repeat; position: relative; overflow: hidden; }
+    .login-page::before { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(155,28,68,0.25) 0%, rgba(155,28,68,0.5) 50%, rgba(155,28,68,0.8) 100%); z-index: 1; }
+    .login-content { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; flex: 1; padding: 40px 32px 60px; }
+    .login-logo { font-size: 56px; margin-bottom: 8px; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.2)); }
+    .login-title { font-size: 28px; font-weight: bold; color: white; margin-bottom: 4px; letter-spacing: 2px; text-shadow: 0 2px 12px rgba(0,0,0,0.2); }
+    .login-subtitle { font-size: 13px; color: rgba(255,255,255,0.85); margin-bottom: 32px; text-shadow: 0 1px 6px rgba(0,0,0,0.15); }
     .login-form { width: 100%; max-width: 320px; }
     .login-form .el-input { margin-bottom: 16px; }
+    .login-form .el-input__wrapper { border-radius: 12px !important; height: 48px !important; font-size: 15px !important; }
+    .login-form .el-input__inner { height: 48px !important; line-height: 48px !important; }
     .code-row { display: flex; gap: 10px; margin-bottom: 20px; align-items: stretch; }
     .code-row .el-input { margin-bottom: 0; flex: 1; }
-    .code-row .el-button { white-space: nowrap; min-width: 110px; height: auto; flex-shrink: 0; }
+    .code-row .el-input__wrapper { border-radius: 12px !important; height: 48px !important; }
+    .code-row .el-input__inner { height: 48px !important; line-height: 48px !important; }
+    .code-row .el-button { white-space: nowrap; min-width: 110px; flex-shrink: 0; height: 48px !important; border-radius: 12px !important; font-size: 14px !important; }
+    .login-form .el-button--large { height: 48px !important; border-radius: 12px !important; font-size: 16px !important; margin-top: 8px; }
 
     /* Profile Setup */
     .page { flex: 1; padding: 16px; }
@@ -213,24 +220,24 @@
     <!-- LOGIN -->
     <template v-if="currentPage === 'login'">
       <div class="login-page">
-        <div class="login-logo">🌸</div>
-        <div class="login-title">更年不期</div>
-        <div class="login-subtitle">温暖陪伴，安心度过每一程</div>
-        <div class="login-form">
-          <el-input v-model="loginForm.phone" placeholder="请输入手机号" maxlength="11" clearable></el-input>
-          <div class="code-row">
-            <input v-model="loginForm.code" placeholder="验证码" maxlength="4"
-                   style="flex:1; padding: 0 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; outline: none; min-height: 40px;"
-                   @focus="this.style.borderColor='var(--primary)'" @blur="this.style.borderColor='var(--border)'" />
-            <el-button @click="sendCode" :disabled="sendingCode || !isValidPhone" :loading="sendingCode">
-              {{ codeBtnText }}
+        <div class="login-content">
+          <div class="login-logo">🌸</div>
+          <div class="login-title">更年不期</div>
+          <div class="login-subtitle">温暖陪伴，安心度过每一程</div>
+          <div class="login-form">
+            <el-input v-model="loginForm.phone" placeholder="请输入手机号" maxlength="11" clearable size="large"></el-input>
+            <div class="code-row">
+              <el-input v-model="loginForm.code" placeholder="验证码" maxlength="4" clearable size="large"></el-input>
+              <el-button @click="sendCode" :disabled="sendingCode || !isValidPhone" :loading="sendingCode" size="large">
+                {{ codeBtnText }}
+              </el-button>
+            </div>
+            <el-button type="primary" @click="handleLogin" :loading="loggingIn" size="large" block>
+              登录 / 注册
             </el-button>
-          </div>
-          <el-button type="primary" @click="handleLogin" :loading="loggingIn" size="large" block>
-            登录 / 注册
-          </el-button>
-          <div style="text-align: center; margin-top: 16px; font-size: 12px; color: var(--text-light);">
-            测试账号：13712345678，验证码 1234
+            <div style="text-align: center; margin-top: 16px; font-size: 12px; color: rgba(255,255,255,0.7);">
+              测试账号：13712345678，验证码 1234
+            </div>
           </div>
         </div>
       </div>

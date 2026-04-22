@@ -34,8 +34,8 @@ class Settings(BaseSettings):
 
     # Vision (Qwen VL for OCR)
     VISION_API_KEY: str = ""
-    VISION_MODEL: str = "qwen3.5-plus"
-    VISION_BASE_URL: str = "https://coding.dashscope.aliyuncs.com/v1"
+    VISION_MODEL: str = "qwen-vl-max-latest"
+    VISION_BASE_URL: str = "https://dashscope.aliyuncs.com/compatible-mode/v1"
 
     # SMS
     SMS_PROVIDER: str = "aliyun"
