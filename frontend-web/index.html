@@ -94,7 +94,7 @@
     .msg-bubble { padding: 10px 14px; border-radius: 16px; font-size: 14px; line-height: 1.7; word-break: break-word; white-space: pre-wrap; }
     .msg-row.assistant .msg-bubble { background: white; color: #3D3D3D; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border-bottom-left-radius: 4px; }
     .msg-row.assistant .msg-bubble strong { font-weight: 700; color: #3D3D3D; }
-    .msg-row.user .msg-bubble { background: #5B8A72; color: white; border-bottom-right-radius: 4px; }
+    .msg-row.user .msg-bubble { background: var(--primary); color: white; border-bottom-right-radius: 4px; }
     .msg-row.user .msg-bubble strong { font-weight: 700; }
     .msg-time { font-size: 10px; color: #BBB; margin-top: 4px; padding: 0 4px; }
     .msg-row.user .msg-time { text-align: right; }
@@ -103,15 +103,19 @@
     .chat-suggestions { padding: 8px 16px 12px; flex-shrink: 0; border-top: 1px solid #E8E4DE; background: white; }
     .chat-suggestions-title { font-size: 12px; color: #999; margin-bottom: 8px; }
     .chat-suggestions-list { display: flex; flex-wrap: wrap; gap: 8px; }
-    .chat-suggestion-chip { padding: 6px 14px; border-radius: 18px; border: 1px solid #E8E4DE; background: white; font-size: 12px; color: #5B8A72; cursor: pointer; transition: all 0.15s; }
-    .chat-suggestion-chip:active { background: #5B8A72; color: white; border-color: #5B8A72; }
+    .chat-suggestion-chip { padding: 6px 14px; border-radius: 18px; border: 1px solid var(--primary-light); background: white; font-size: 12px; color: var(--primary); cursor: pointer; transition: all 0.15s; }
+    .chat-suggestion-chip:active { background: var(--primary); color: white; border-color: var(--primary); }
 
     /* Chat input area */
     .chat-input-area { padding: 10px 16px; padding-bottom: max(10px, env(safe-area-inset-bottom)); background: white; display: flex; gap: 8px; align-items: flex-end; flex-shrink: 0; border-top: 1px solid #E8E4DE; }
-    .chat-input-area .el-input__wrapper { border-radius: 20px !important; }
-    .chat-input-area .el-input__inner { height: 36px !important; font-size: 14px !important; }
-    .chat-send-btn { width: 40px; height: 40px; border-radius: 50%; background: #5B8A72; color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 18px; }
-    .chat-send-btn:active { background: #4A7A62; }
+    .chat-send-btn { width: 40px; height: 40px; border-radius: 50%; background: var(--primary); color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 18px; transition: background 0.15s; }
+    .chat-send-btn:active { background: var(--primary-dark); }
+    .chat-send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Multi-line input */
+    .chat-input-wrap { flex: 1; display: flex; align-items: flex-end; background: white; border: 1px solid var(--border); border-radius: 20px; padding: 4px 12px; min-height: 36px; }
+    .chat-input-wrap textarea { width: 100%; border: none; outline: none; resize: none; font-size: 14px; line-height: 1.4; max-height: 72px; overflow-y: auto; padding: 6px 0; background: transparent; font-family: inherit; }
+    .chat-input-wrap textarea::placeholder { color: #BBB; }
 
     /* Record pages */
     .record-list { display: flex; flex-direction: column; gap: 8px; }
@@ -565,7 +569,9 @@
             </div>
             <!-- Input area -->
             <div class="chat-input-area">
-              <el-input v-model="chatInput" placeholder="输入你的问题..." @keyup.enter="sendMessage" clearable></el-input>
+              <div class="chat-input-wrap">
+                <textarea ref="chatTextarea" v-model="chatInput" placeholder="输入你的问题..." @input="autoGrowTextarea" @keydown.enter.exact.prevent="sendMessage"></textarea>
+              </div>
               <button class="chat-send-btn" @click="sendMessage" :disabled="!chatInput.trim() || chatLoading">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
               </button>
@@ -740,6 +746,7 @@
         const chatInput = ref('');
         const chatLoading = ref(false);
         const chatScroll = ref(null);
+        const chatTextarea = ref(null);
         const sessionId = ref('');
         const suggestedQuestions = ref(['如何改善睡眠？', '情绪波动怎么办？', '推荐的营养补充剂？', '需要做哪些检查？', '潮热出汗怎么缓解？']);
 
@@ -922,10 +929,18 @@
           return html;
         }
 
+        function autoGrowTextarea() {
+          if (!chatTextarea.value) return;
+          const el = chatTextarea.value;
+          el.style.height = 'auto';
+          el.style.height = Math.min(el.scrollHeight, 72) + 'px';
+        }
+
         async function sendMessage() {
           if (!chatInput.value.trim() || chatLoading.value) return;
           const content = chatInput.value.trim();
           chatInput.value = '';
+          if (chatTextarea.value) chatTextarea.value.style.height = 'auto';
           messages.value.push({ id: 'tmp', role: 'user', content });
           chatLoading.value = true;
           await nextTick(); scrollToBottom();
@@ -1230,7 +1245,7 @@
           showHormoneForm, hormoneTaking, hormoneCurrentDim, hormoneQuestions, hormoneAnswers, hormoneCompleted, hormoneShowValidation,
           startHormone, hormoneNextDim, hormonePrevDim, submitHormone,
           showHormoneResult, hormoneResult, deleteScaleTest, touchDelete, releaseDelete,
-          switchTab, loadChatHistory, sendMessage, formatMsgTime, renderMd, handleLogout, goToProfileSetup,
+          switchTab, loadChatHistory, sendMessage, autoGrowTextarea, formatMsgTime, renderMd, handleLogout, goToProfileSetup,
         };
       }
     }).use(ElementPlus).mount('#app');
